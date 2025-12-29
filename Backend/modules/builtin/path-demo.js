@@ -1,6 +1,3 @@
-// ====== PATH MODULE ======
-// Module để xử lý đường dẫn file/thư mục
-
 const path = require('path');
 
 console.log("====== PATH MODULE DEMO ======\n");

@@ -1,5 +1,3 @@
-// ====== ES Modules - Using import to import modules ======
-
 // Import default export
 import calculator from './math.mjs';
 

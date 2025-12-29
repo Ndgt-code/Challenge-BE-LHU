@@ -1,6 +1,3 @@
-// ====== OS MODULE ======
-// Module để lấy thông tin hệ điều hành
-
 const os = require('os');
 
 console.log("====== OS MODULE DEMO ======\n");

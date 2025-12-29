@@ -1,5 +1,3 @@
-// ====== CommonJS - Using require() to import ======
-
 // Import entire module
 const math = require('./math');
 

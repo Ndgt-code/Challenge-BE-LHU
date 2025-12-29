@@ -1,6 +1,3 @@
-// ====== CommonJS Module ======
-// Using module.exports to export
-
 // Basic calculation functions
 const add = (a, b) => a + b;
 const subtract = (a, b) => a - b;

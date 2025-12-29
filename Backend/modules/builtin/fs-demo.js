@@ -1,6 +1,3 @@
-// ====== FS MODULE - File System ======
-// Module để làm việc với file và thư mục
-
 const fs = require('fs');
 const path = require('path');
 
