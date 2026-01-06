@@ -31,31 +31,31 @@ app.use(express.json());
 // USER ROUTES - Test CRUD
 // ==========================================
 
-// GET - Lấy tất cả users
+// GET - All users
 app.get('/api/users', async (req, res) => {
     const users = await User.find();
     res.json(users);
 });
 
-// GET - Lấy 1 user theo ID
+// GET - Get user by ID
 app.get('/api/users/:id', async (req, res) => {
     const user = await User.findById(req.params.id);
     res.json(user);
 });
 
-// POST - Tạo user mới
+// POST - Create new user
 app.post('/api/users', async (req, res) => {
     const user = await User.create(req.body);
     res.status(201).json(user);
 });
 
-// PUT - Cập nhật user
+// PUT - Update user
 app.put('/api/users/:id', async (req, res) => {
     const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(user);
 });
 
-// DELETE - Xóa user
+// DELETE - Delete user
 app.delete('/api/users/:id', async (req, res) => {
     await User.findByIdAndDelete(req.params.id);
     res.json({ message: 'User deleted!' });
@@ -65,13 +65,13 @@ app.delete('/api/users/:id', async (req, res) => {
 // PRODUCT ROUTES - Test CRUD
 // ==========================================
 
-// GET - Lấy tất cả products
+// GET - All products
 app.get('/api/products', async (req, res) => {
     const products = await Product.find();
     res.json(products);
 });
 
-// POST - Tạo product mới
+// POST - Create new product
 app.post('/api/products', async (req, res) => {
     const product = await Product.create(req.body);
     res.status(201).json(product);
@@ -85,12 +85,12 @@ app.listen(PORT, () => {
     console.log(`🚀 Server: http://localhost:${PORT}`);
     console.log('='.repeat(50));
     console.log('\n📋 TEST ROUTES:');
-    console.log('   GET    /api/users      - Lấy tất cả users');
-    console.log('   GET    /api/users/:id  - Lấy 1 user');
-    console.log('   POST   /api/users      - Tạo user mới');
-    console.log('   PUT    /api/users/:id  - Cập nhật user');
-    console.log('   DELETE /api/users/:id  - Xóa user');
-    console.log('   GET    /api/products   - Lấy tất cả products');
-    console.log('   POST   /api/products   - Tạo product mới');
+    console.log('   GET    /api/users      - Get all users');
+    console.log('   GET    /api/users/:id  - Get user by ID');
+    console.log('   POST   /api/users      - Create new user');
+    console.log('   PUT    /api/users/:id  - Update user');
+    console.log('   DELETE /api/users/:id  - Delete user');
+    console.log('   GET    /api/products   - Get all products');
+    console.log('   POST   /api/products   - Create new product');
     console.log('\n');
 });

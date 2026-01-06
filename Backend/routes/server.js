@@ -4,7 +4,7 @@ import { connectDB } from "./src/config/db.js";
 
 const app = express();
 
-// Kết nối MongoDB
+// Connect MongoDB
 connectDB();
 
 app.get("/", (req, res) => {

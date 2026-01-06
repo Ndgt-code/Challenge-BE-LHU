@@ -1,35 +1,35 @@
 const mongoose = require('mongoose');
 
 // ==========================================
-// PRODUCT SCHEMA - Phiên bản đơn giản
+// PRODUCT SCHEMA - Simple version
 // ==========================================
 
 const productSchema = new mongoose.Schema({
-    // STRING - Tên sản phẩm
+    // STRING - Product name
     name: {
         type: String,
         required: true
     },
 
-    // NUMBER - Giá
+    // NUMBER - Price
     price: {
         type: Number,
         required: true,
-        min: 0              // Giá không được âm
+        min: 0              // Price cannot be negative
     },
 
-    // STRING - Mô tả
+    // STRING - Description
     description: {
         type: String
     },
 
-    // NUMBER - Số lượng trong kho
+    // NUMBER - Stock quantity
     stock: {
         type: Number,
         default: 0
     },
 
-    // STRING với ENUM - Chỉ chấp nhận một số giá trị
+    // STRING with ENUM - Only accepts specific values
     category: {
         type: String,
         enum: ['electronics', 'clothing', 'food', 'other'],
@@ -39,7 +39,7 @@ const productSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Tạo Model từ Schema
+// Create Model from Schema
 const Product = mongoose.model('Product', productSchema);
 
 module.exports = Product;

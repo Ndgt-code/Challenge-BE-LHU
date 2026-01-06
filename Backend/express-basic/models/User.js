@@ -1,38 +1,38 @@
 const mongoose = require('mongoose');
 
 // ==========================================
-// USER SCHEMA - Phiên bản đơn giản
+// USER SCHEMA - Simple version
 // ==========================================
 
 const userSchema = new mongoose.Schema({
-    // STRING - Tên người dùng
+    // STRING - User name
     name: {
         type: String,
-        required: true      // Bắt buộc phải có
+        required: true      // Required field
     },
 
     // STRING - Email
     email: {
         type: String,
         required: true,
-        unique: true        // Không được trùng
+        unique: true        // Must be unique
     },
 
-    // NUMBER - Tuổi
+    // NUMBER - Age
     age: {
         type: Number
     },
 
-    // BOOLEAN - Đang hoạt động?
+    // BOOLEAN - Is active?
     isActive: {
         type: Boolean,
-        default: true       // Mặc định là true
+        default: true       // Default is true
     }
 }, {
-    timestamps: true        // Tự động thêm createdAt, updatedAt
+    timestamps: true        // Auto add createdAt, updatedAt
 });
 
-// Tạo Model từ Schema
+// Create Model from Schema
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
