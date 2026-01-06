@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 // ==========================================
-// PRODUCT SCHEMA - Simple version
+// PRODUCT SCHEMA - Simple versio
 // ==========================================
 
 const productSchema = new mongoose.Schema({
