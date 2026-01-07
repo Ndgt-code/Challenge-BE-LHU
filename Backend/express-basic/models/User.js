@@ -5,10 +5,17 @@ const mongoose = require('mongoose');
 // ==========================================
 
 const userSchema = new mongoose.Schema({
+    // NUMBER - User ID (số thứ tự)
+    userId: {
+        type: Number,
+        required: true,
+        unique: true
+    },
+
     // STRING - User name
     name: {
         type: String,
-        required: true      // Required fiel
+        required: true      // Required field
     },
 
     // STRING - Email

@@ -5,6 +5,13 @@ const mongoose = require('mongoose');
 // ==========================================
 
 const productSchema = new mongoose.Schema({
+    // NUMBER - Product ID (số thứ tự)
+    productId: {
+        type: Number,
+        required: true,
+        unique: true
+    },
+
     // STRING - Product name
     name: {
         type: String,
