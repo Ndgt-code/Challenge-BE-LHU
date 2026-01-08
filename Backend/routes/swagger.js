@@ -5,14 +5,15 @@ const options = {
     definition: {
         openapi: '3.0.0',
         info: {
-            title: 'CUD Examples API',
+            title: 'Task Manager & CRUD API',
             version: '1.0.0',
-            description: 'API for CRUD operations with Users and Products',
+            description: 'API for managing Users, Products, and Tasks',
         },
         servers: [{ url: 'http://localhost:3002' }],
         tags: [
             { name: 'Users', description: 'User management APIs' },
-            { name: 'Products', description: 'Product management APIs' }
+            { name: 'Products', description: 'Product management APIs' },
+            { name: 'Tasks', description: 'Task management APIs' }
         ],
         paths: {
             // ========== USERS ==========
@@ -280,6 +281,106 @@ const options = {
                     tags: ['Products'],
                     summary: 'Delete out of stock products (stock = 0)',
                     responses: { 200: { description: 'Out of stock products deleted' } }
+                }
+            },
+            // ========== TASKS ==========
+            '/api/tasks': {
+                get: {
+                    tags: ['Tasks'],
+                    summary: 'Get all tasks (optional: ?status=pending or ?priority=high)',
+                    parameters: [
+                        { name: 'status', in: 'query', schema: { type: 'string', enum: ['pending', 'in-progress', 'completed'] } },
+                        { name: 'priority', in: 'query', schema: { type: 'string', enum: ['low', 'medium', 'high'] } }
+                    ],
+                    responses: { 200: { description: 'List of tasks' } }
+                },
+                post: {
+                    tags: ['Tasks'],
+                    summary: 'Create new task',
+                    requestBody: {
+                        required: true,
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    required: ['title'],
+                                    properties: {
+                                        title: { type: 'string', example: 'Complete project' },
+                                        description: { type: 'string', example: 'Finish the API project' },
+                                        status: { type: 'string', enum: ['pending', 'in-progress', 'completed'], example: 'pending' },
+                                        priority: { type: 'string', enum: ['low', 'medium', 'high'], example: 'high' },
+                                        dueDate: { type: 'string', format: 'date', example: '2026-01-15' }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    responses: { 201: { description: 'Task created' } }
+                }
+            },
+            '/api/tasks/{id}': {
+                get: {
+                    tags: ['Tasks'],
+                    summary: 'Get task by ID',
+                    parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+                    responses: { 200: { description: 'Task details' } }
+                },
+                put: {
+                    tags: ['Tasks'],
+                    summary: 'Update task by ID',
+                    parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+                    requestBody: {
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        title: { type: 'string' },
+                                        description: { type: 'string' },
+                                        status: { type: 'string', enum: ['pending', 'in-progress', 'completed'] },
+                                        priority: { type: 'string', enum: ['low', 'medium', 'high'] },
+                                        dueDate: { type: 'string', format: 'date' }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    responses: { 200: { description: 'Task updated' } }
+                },
+                delete: {
+                    tags: ['Tasks'],
+                    summary: 'Delete task by ID',
+                    parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+                    responses: { 200: { description: 'Task deleted' } }
+                }
+            },
+            '/api/tasks/{id}/status': {
+                patch: {
+                    tags: ['Tasks'],
+                    summary: 'Update task status',
+                    parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+                    requestBody: {
+                        required: true,
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    required: ['status'],
+                                    properties: {
+                                        status: { type: 'string', enum: ['pending', 'in-progress', 'completed'], example: 'completed' }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    responses: { 200: { description: 'Task status updated' } }
+                }
+            },
+            '/api/tasks/bulk/completed': {
+                delete: {
+                    tags: ['Tasks'],
+                    summary: 'Delete all completed tasks',
+                    responses: { 200: { description: 'Completed tasks deleted' } }
                 }
             }
         }
