@@ -1,7 +1,5 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const swaggerUi = require('swagger-ui-express');
-const swaggerJsdoc = require('swagger-jsdoc');
 
 // Import Models
 const User = require('../express-basic/models/User');
@@ -9,27 +7,6 @@ const Product = require('../express-basic/models/Product');
 
 const app = express();
 const PORT = 3001;
-
-// ==========================================
-// SWAGGER CONFIGURATION
-// ==========================================
-const swaggerOptions = {
-    definition: {
-        openapi: '3.0.0',
-        info: {
-            title: '📚 CRUD (R) - Query Examples API',
-            version: '1.0.0',
-            description: 'API tutorial for MongoDB queries: find, findOne, basic filters'
-        },
-        servers: [
-            { url: `http://localhost:${PORT}` }
-        ]
-    },
-    apis: ['./queryExamples.js']
-};
-
-const swaggerDocs = swaggerJsdoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // ==========================================
 // MONGODB CONNECTION
@@ -54,39 +31,11 @@ app.use(express.json());
 // 📚 CRUD (R) - QUERY EXAMPLES
 // ==========================================
 
-// HOME ROUTE - Usage guide
-app.get('/', (req, res) => {
-    res.json({
-        message: '🚀 Query Examples API - CRUD (R)',
-        routes: {
-            'GET /api/users': 'Lấy tất cả users',
-            'GET /api/products': 'Lấy tất cả products',
-            'GET /api/users/:id': 'Tìm user theo ID',
-            'GET /api/users/email/:email': 'Tìm user theo email',
-            'GET /api/users/filter/active': 'Users đang active',
-            'GET /api/users/filter/age-gte/:age': 'Users tuổi >= giá trị',
-            'GET /api/products/filter/category/:cat': 'Products theo category',
-            'GET /api/products/filter/price?min=&max=': 'Products theo khoảng giá',
-            'GET /api/products/filter/in-stock': 'Products còn hàng',
-            'GET /api/products/query/paginate?page=&limit=': 'Pagination'
-        }
-    });
-});
-
 // ------------------------------------------
-// 1️⃣ find() - Get all documents
+// 1️⃣ find() - Lấy tất cả documents
 // ------------------------------------------
 
-/**
- * @swagger
- * /api/users:
- *   get:
- *     summary: Get all users
- *     tags: [1. find()]
- *     responses:
- *       200:
- *         description: List of users
- */
+// GET - Lấy tất cả users
 app.get('/api/users', async (req, res) => {
     try {
         const users = await User.find();
@@ -99,16 +48,7 @@ app.get('/api/users', async (req, res) => {
     }
 });
 
-/**
- * @swagger
- * /api/products:
- *   get:
- *     summary: Get all products
- *     tags: [1. find()]
- *     responses:
- *       200:
- *         description: List of products
- */
+// GET - Lấy tất cả products
 app.get('/api/products', async (req, res) => {
     try {
         const products = await Product.find();
@@ -122,28 +62,10 @@ app.get('/api/products', async (req, res) => {
 });
 
 // ------------------------------------------
-// 2️⃣ findOne() - Find first matching document
+// 2️⃣ findOne() - Tìm 1 document đầu tiên
 // ------------------------------------------
 
-/**
- * @swagger
- * /api/users/email/{email}:
- *   get:
- *     summary: Find user by email
- *     tags: [2. findOne()]
- *     parameters:
- *       - in: path
- *         name: email
- *         required: true
- *         schema:
- *           type: string
- *         example: nguyenvana@gmail.com
- *     responses:
- *       200:
- *         description: User found
- *       404:
- *         description: User not found
- */
+// GET - Tìm user theo email
 app.get('/api/users/email/:email', async (req, res) => {
     try {
         const user = await User.findOne({ email: req.params.email });
@@ -158,7 +80,7 @@ app.get('/api/users/email/:email', async (req, res) => {
     }
 });
 
-// GET - Find product by name
+// GET - Tìm product theo name
 app.get('/api/products/name/:name', async (req, res) => {
     try {
         const product = await Product.findOne({ name: req.params.name });
@@ -174,28 +96,10 @@ app.get('/api/products/name/:name', async (req, res) => {
 });
 
 // ------------------------------------------
-// 3️⃣ findById() - Find by ID
+// 3️⃣ findById() - Tìm theo ID
 // ------------------------------------------
 
-/**
- * @swagger
- * /api/users/{id}:
- *   get:
- *     summary: Find user by ID
- *     tags: [3. findById()]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: MongoDB ObjectId
- *     responses:
- *       200:
- *         description: User found
- *       404:
- *         description: User not found
- */
+// GET - Tìm user theo ID
 app.get('/api/users/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
@@ -211,19 +115,10 @@ app.get('/api/users/:id', async (req, res) => {
 });
 
 // ------------------------------------------
-// 4️⃣ BASIC FILTER - Comparison Operators
+// 4️⃣ FILTER CƠ BẢN - Comparison Operators
 // ------------------------------------------
 
-/**
- * @swagger
- * /api/users/filter/active:
- *   get:
- *     summary: Get active users (isActive = true)
- *     tags: [4. Basic Filter]
- *     responses:
- *       200:
- *         description: List of active users
- */
+// GET - Users đang active
 app.get('/api/users/filter/active', async (req, res) => {
     try {
         const users = await User.find({ isActive: true });
@@ -236,23 +131,7 @@ app.get('/api/users/filter/active', async (req, res) => {
     }
 });
 
-/**
- * @swagger
- * /api/users/filter/age-gte/{age}:
- *   get:
- *     summary: Users with age >= value ($gte operator)
- *     tags: [4. Basic Filter]
- *     parameters:
- *       - in: path
- *         name: age
- *         required: true
- *         schema:
- *           type: integer
- *         example: 25
- *     responses:
- *       200:
- *         description: List of users
- */
+// GET - Users có tuổi >= giá trị
 app.get('/api/users/filter/age-gte/:age', async (req, res) => {
     try {
         // $gte = greater than or equal (>=)
@@ -268,24 +147,7 @@ app.get('/api/users/filter/age-gte/:age', async (req, res) => {
     }
 });
 
-/**
- * @swagger
- * /api/products/filter/category/{category}:
- *   get:
- *     summary: Products by category
- *     tags: [4. Basic Filter]
- *     parameters:
- *       - in: path
- *         name: category
- *         required: true
- *         schema:
- *           type: string
- *           enum: [electronics, clothing, food, other]
- *         example: electronics
- *     responses:
- *       200:
- *         description: List of products
- */
+// GET - Products theo category
 app.get('/api/products/filter/category/:category', async (req, res) => {
     try {
         const products = await Product.find({
@@ -300,27 +162,8 @@ app.get('/api/products/filter/category/:category', async (req, res) => {
     }
 });
 
-/**
- * @swagger
- * /api/products/filter/price:
- *   get:
- *     summary: Products by price range ($gte, $lte)
- *     tags: [4. Basic Filter]
- *     parameters:
- *       - in: query
- *         name: min
- *         schema:
- *           type: integer
- *         example: 100000
- *       - in: query
- *         name: max
- *         schema:
- *           type: integer
- *         example: 1000000
- *     responses:
- *       200:
- *         description: List of products in price range
- */
+// GET - Products theo khoảng giá (min-max)
+// URL: /api/products/filter/price?min=100&max=500
 app.get('/api/products/filter/price', async (req, res) => {
     try {
         const { min, max } = req.query;
@@ -343,16 +186,7 @@ app.get('/api/products/filter/price', async (req, res) => {
     }
 });
 
-/**
- * @swagger
- * /api/products/filter/in-stock:
- *   get:
- *     summary: Products in stock (stock > 0)
- *     tags: [4. Basic Filter]
- *     responses:
- *       200:
- *         description: List of products in stock
- */
+// GET - Products còn hàng (stock > 0)
 app.get('/api/products/filter/in-stock', async (req, res) => {
     try {
         // $gt = greater than (>)
@@ -369,26 +203,11 @@ app.get('/api/products/filter/in-stock', async (req, res) => {
 });
 
 // ------------------------------------------
-// 5️⃣ $in OPERATOR - Find in array of values
+// 5️⃣ $in OPERATOR - Tìm trong mảng giá trị
 // ------------------------------------------
 
-/**
- * @swagger
- * /api/products/filter/categories:
- *   get:
- *     summary: Products in multiple categories ($in operator)
- *     tags: [5. $in & $or]
- *     parameters:
- *       - in: query
- *         name: cats
- *         schema:
- *           type: string
- *         example: electronics,food
- *         description: List of categories separated by comma
- *     responses:
- *       200:
- *         description: List of products
- */
+// GET - Products thuộc nhiều categories
+// URL: /api/products/filter/categories?cats=electronics,clothing
 app.get('/api/products/filter/categories', async (req, res) => {
     try {
         const categories = req.query.cats?.split(',') || [];
@@ -408,16 +227,16 @@ app.get('/api/products/filter/categories', async (req, res) => {
 });
 
 // ------------------------------------------
-// 6️⃣ $or OPERATOR - Logical OR
+// 6️⃣ $or OPERATOR - Hoặc
 // ------------------------------------------
 
-// GET - Products cheap OR high stock available
+// GET - Products giá rẻ HOẶC còn nhiều hàng
 app.get('/api/products/filter/cheap-or-available', async (req, res) => {
     try {
         const products = await Product.find({
             $or: [
-                { price: { $lt: 100 } },      // Price < 100
-                { stock: { $gte: 50 } }       // OR stock >= 50
+                { price: { $lt: 100 } },      // Giá < 100
+                { stock: { $gte: 50 } }       // Hoặc stock >= 50
             ]
         });
         res.json({
@@ -433,12 +252,12 @@ app.get('/api/products/filter/cheap-or-available', async (req, res) => {
 // 7️⃣ SELECT, SORT, LIMIT, SKIP
 // ------------------------------------------
 
-// GET - Users with only name and email, sorted by name
+// GET - Users chỉ lấy name và email, sắp xếp theo name
 app.get('/api/users/query/select-sort', async (req, res) => {
     try {
         const users = await User.find()
-            .select('name email')           // Select only name, email
-            .sort({ name: 1 });             // Sort A-Z
+            .select('name email')           // Chỉ lấy name, email
+            .sort({ name: 1 });             // Sắp xếp A-Z
 
         res.json({
             count: users.length,
@@ -449,7 +268,7 @@ app.get('/api/users/query/select-sort', async (req, res) => {
     }
 });
 
-// GET - Products with pagination
+// GET - Products với pagination
 // URL: /api/products/query/paginate?page=1&limit=10
 app.get('/api/products/query/paginate', async (req, res) => {
     try {
@@ -458,7 +277,7 @@ app.get('/api/products/query/paginate', async (req, res) => {
         const skip = (page - 1) * limit;
 
         const products = await Product.find()
-            .sort({ createdAt: -1 })        // Newest first
+            .sort({ createdAt: -1 })        // Mới nhất trước
             .skip(skip)
             .limit(limit);
 
@@ -480,7 +299,7 @@ app.get('/api/products/query/paginate', async (req, res) => {
 // 8️⃣ COUNT DOCUMENTS
 // ------------------------------------------
 
-// GET - Count active users
+// GET - Đếm số users active
 app.get('/api/users/count/active', async (req, res) => {
     try {
         const count = await User.countDocuments({ isActive: true });

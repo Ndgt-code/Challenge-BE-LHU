@@ -1,35 +1,34 @@
 const mongoose = require('mongoose');
 
 // ==========================================
-// PRODUCT SCHEMA - Simple versio
+// PRODUCT SCHEMA
 // ==========================================
-
 const productSchema = new mongoose.Schema({
-    // STRING - Product name
+    // Product name
     name: {
         type: String,
         required: true
     },
 
-    // NUMBER - Price
+    // Price (non-negative)
     price: {
         type: Number,
         required: true,
-        min: 0              // Price cannot be negative
+        min: 0
     },
 
-    // STRING - Description
+    // Description
     description: {
         type: String
     },
 
-    // NUMBER - Stock quantity
+    // Stock quantity
     stock: {
         type: Number,
         default: 0
     },
 
-    // STRING with ENUM - Only accepts specific values
+    // Category (enum)
     category: {
         type: String,
         enum: ['electronics', 'clothing', 'food', 'other'],
@@ -39,7 +38,6 @@ const productSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Create Model from Schema
 const Product = mongoose.model('Product', productSchema);
 
 module.exports = Product;

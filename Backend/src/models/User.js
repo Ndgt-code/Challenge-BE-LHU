@@ -1,38 +1,36 @@
 const mongoose = require('mongoose');
 
 // ==========================================
-// USER SCHEMA - Simple version
+// USER SCHEMA
 // ==========================================
-
 const userSchema = new mongoose.Schema({
-    // STRING - User name
+    // User name
     name: {
         type: String,
-        required: true      // Required fiel
+        required: true
     },
 
-    // STRING - Email
+    // Email (unique)
     email: {
         type: String,
         required: true,
-        unique: true        // Must be unique
+        unique: true
     },
 
-    // NUMBER - Age
+    // Age
     age: {
         type: Number
     },
 
-    // BOOLEAN - Is active?
+    // Is active?
     isActive: {
         type: Boolean,
-        default: true       // Default is true
+        default: true
     }
 }, {
-    timestamps: true        // Auto add createdAt, updatedAt
+    timestamps: true
 });
 
-// Create Model from Schema
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
