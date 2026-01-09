@@ -11,11 +11,103 @@ const options = {
         },
         servers: [{ url: 'http://localhost:3002' }],
         tags: [
+            { name: 'Auth', description: 'Authentication APIs (Register, Login)' },
             { name: 'Users', description: 'User management APIs' },
             { name: 'Products', description: 'Product management APIs' },
             { name: 'Tasks', description: 'Task management APIs' }
         ],
         paths: {
+            // ========== AUTH ==========
+            '/api/auth/register': {
+                post: {
+                    tags: ['Auth'],
+                    summary: 'Register new user',
+                    requestBody: {
+                        required: true,
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    required: ['username', 'email', 'password', 'confirmPassword'],
+                                    properties: {
+                                        username: { type: 'string', example: 'johndoe', minLength: 3, maxLength: 30 },
+                                        email: { type: 'string', format: 'email', example: 'john@example.com' },
+                                        password: { type: 'string', example: '123456', minLength: 6 },
+                                        confirmPassword: { type: 'string', example: '123456' }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    responses: {
+                        201: { description: 'User registered successfully' },
+                        400: { description: 'Validation failed or email/username already exists' }
+                    }
+                }
+            },
+            '/api/auth/login': {
+                post: {
+                    tags: ['Auth'],
+                    summary: 'Login user',
+                    requestBody: {
+                        required: true,
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    required: ['email', 'password'],
+                                    properties: {
+                                        email: { type: 'string', format: 'email', example: 'john@example.com' },
+                                        password: { type: 'string', example: '123456' }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    responses: {
+                        200: { description: 'Login successful' },
+                        401: { description: 'Invalid email or password' }
+                    }
+                }
+            },
+            '/api/auth/profile/{userId}': {
+                get: {
+                    tags: ['Auth'],
+                    summary: 'Get user profile',
+                    parameters: [{ name: 'userId', in: 'path', required: true, schema: { type: 'string' } }],
+                    responses: {
+                        200: { description: 'User profile retrieved' },
+                        404: { description: 'User not found' }
+                    }
+                }
+            },
+            '/api/auth/change-password/{userId}': {
+                put: {
+                    tags: ['Auth'],
+                    summary: 'Change user password',
+                    parameters: [{ name: 'userId', in: 'path', required: true, schema: { type: 'string' } }],
+                    requestBody: {
+                        required: true,
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    required: ['currentPassword', 'newPassword', 'confirmNewPassword'],
+                                    properties: {
+                                        currentPassword: { type: 'string', example: '123456' },
+                                        newPassword: { type: 'string', example: 'newpass123', minLength: 6 },
+                                        confirmNewPassword: { type: 'string', example: 'newpass123' }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    responses: {
+                        200: { description: 'Password changed successfully' },
+                        401: { description: 'Current password is incorrect' }
+                    }
+                }
+            },
             // ========== USERS ==========
             '/api/users': {
                 get: {
