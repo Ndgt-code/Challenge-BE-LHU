@@ -463,7 +463,8 @@ const options = {
                 },
                 post: {
                     tags: ['Tasks'],
-                    summary: 'Create new task',
+                    summary: 'Create new task (Protected)',
+                    security: [{ bearerAuth: [] }],
                     requestBody: {
                         required: true,
                         content: {
@@ -482,7 +483,7 @@ const options = {
                             }
                         }
                     },
-                    responses: { 201: { description: 'Task created' } }
+                    responses: { 201: { description: 'Task created' }, 401: { description: 'Unauthorized' } }
                 }
             },
             '/api/tasks/{id}': {
@@ -494,7 +495,8 @@ const options = {
                 },
                 put: {
                     tags: ['Tasks'],
-                    summary: 'Update task by ID',
+                    summary: 'Update task by ID (Protected)',
+                    security: [{ bearerAuth: [] }],
                     parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
                     requestBody: {
                         content: {
@@ -512,19 +514,21 @@ const options = {
                             }
                         }
                     },
-                    responses: { 200: { description: 'Task updated' } }
+                    responses: { 200: { description: 'Task updated' }, 401: { description: 'Unauthorized' } }
                 },
                 delete: {
                     tags: ['Tasks'],
-                    summary: 'Delete task by ID',
+                    summary: 'Delete task by ID (Protected)',
+                    security: [{ bearerAuth: [] }],
                     parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-                    responses: { 200: { description: 'Task deleted' } }
+                    responses: { 200: { description: 'Task deleted' }, 401: { description: 'Unauthorized' } }
                 }
             },
             '/api/tasks/{id}/status': {
                 patch: {
                     tags: ['Tasks'],
-                    summary: 'Update task status',
+                    summary: 'Update task status (Protected)',
+                    security: [{ bearerAuth: [] }],
                     parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
                     requestBody: {
                         required: true,
@@ -540,14 +544,15 @@ const options = {
                             }
                         }
                     },
-                    responses: { 200: { description: 'Task status updated' } }
+                    responses: { 200: { description: 'Task status updated' }, 401: { description: 'Unauthorized' } }
                 }
             },
             '/api/tasks/bulk/completed': {
                 delete: {
                     tags: ['Tasks'],
-                    summary: 'Delete all completed tasks',
-                    responses: { 200: { description: 'Completed tasks deleted' } }
+                    summary: 'Delete all completed tasks (Admin only)',
+                    security: [{ bearerAuth: [] }],
+                    responses: { 200: { description: 'Completed tasks deleted' }, 403: { description: 'Admin role required' } }
                 }
             }
         }

@@ -1,33 +1,72 @@
 // ==========================================
-// PRODUCT ROUTES
+// PRODUCT ROUTES (with Auth)
 // ==========================================
 
 const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/productController');
 
+// Import authentication middleware
+const { authenticate, authorize } = require('../middlewares/authMiddleware');
+
+// ==========================================
+// PUBLIC ROUTES (Anyone can view)
+// ==========================================
+
 // GET - Retrieve all products
 router.get('/', productController.getAllProducts);
 
-// POST - Create product
-router.post('/', productController.createProduct);
+// ==========================================
+// PROTECTED ROUTES (Auth required)
+// ==========================================
 
-// PUT - Update product by ID
-router.put('/:id', productController.updateProduct);
+// POST - Create product (must be logged in)
+router.post('/',
+    authenticate,
+    productController.createProduct
+);
 
-// PATCH - Increase stock
-router.patch('/:id/increase-stock', productController.increaseStock);
+// PUT - Update product by ID (must be logged in)
+router.put('/:id',
+    authenticate,
+    productController.updateProduct
+);
 
-// PATCH - Decrease stock
-router.patch('/:id/decrease-stock', productController.decreaseStock);
+// PATCH - Increase stock (must be logged in)
+router.patch('/:id/increase-stock',
+    authenticate,
+    productController.increaseStock
+);
 
-// DELETE - Delete product by ID
-router.delete('/:id', productController.deleteProduct);
+// PATCH - Decrease stock (must be logged in)
+router.patch('/:id/decrease-stock',
+    authenticate,
+    productController.decreaseStock
+);
 
-// DELETE - Delete product using deleteOne()
-router.delete('/one/:id', productController.deleteProductOne);
+// ==========================================
+// ADMIN ONLY ROUTES
+// ==========================================
 
-// DELETE - Delete out of stock products
-router.delete('/bulk/out-of-stock', productController.deleteOutOfStockProducts);
+// DELETE - Delete product by ID (admin only)
+router.delete('/:id',
+    authenticate,
+    authorize('admin'),              // Only admin can delete
+    productController.deleteProduct
+);
+
+// DELETE - Delete product using deleteOne() (admin only)
+router.delete('/one/:id',
+    authenticate,
+    authorize('admin'),
+    productController.deleteProductOne
+);
+
+// DELETE - Delete out of stock products (admin only)
+router.delete('/bulk/out-of-stock',
+    authenticate,
+    authorize('admin'),              // Bulk delete = admin only
+    productController.deleteOutOfStockProducts
+);
 
 module.exports = router;

@@ -1,5 +1,5 @@
 // ==========================================
-// TASK ROUTES (with Joi Validation)
+// TASK ROUTES (with Auth & Validation)
 // ==========================================
 
 const express = require('express');
@@ -14,25 +14,62 @@ const {
     updateStatusSchema
 } = require('../validations/taskValidation');
 
+// Import authentication middleware
+const { authenticate, authorize } = require('../middlewares/authMiddleware');
+
+// ==========================================
+// PUBLIC ROUTES (No auth required)
+// ==========================================
+
 // GET - Retrieve all tasks (optional: ?status=pending or ?priority=high)
 router.get('/', taskController.getAllTasks);
 
-// GET - Retrieve task by ID (validate ObjectId)
+// GET - Retrieve task by ID
 router.get('/:id', validateObjectId(), taskController.getTaskById);
 
-// POST - Create new task (with validation)
-router.post('/', validate(createTaskSchema), taskController.createTask);
+// ==========================================
+// PROTECTED ROUTES (Auth required - any logged-in user)
+// ==========================================
 
-// PUT - Update task by ID (validate ObjectId + body)
-router.put('/:id', validateObjectId(), validate(updateTaskSchema), taskController.updateTask);
+// POST - Create new task (must be logged in)
+router.post('/',
+    authenticate,                    // Must be logged in
+    validate(createTaskSchema),
+    taskController.createTask
+);
 
-// PATCH - Update task status only (validate ObjectId + status)
-router.patch('/:id/status', validateObjectId(), validate(updateStatusSchema), taskController.updateTaskStatus);
+// PUT - Update task by ID (must be logged in)
+router.put('/:id',
+    authenticate,
+    validateObjectId(),
+    validate(updateTaskSchema),
+    taskController.updateTask
+);
 
-// DELETE - Delete task by ID (validate ObjectId)
-router.delete('/:id', validateObjectId(), taskController.deleteTask);
+// PATCH - Update task status only (must be logged in)
+router.patch('/:id/status',
+    authenticate,
+    validateObjectId(),
+    validate(updateStatusSchema),
+    taskController.updateTaskStatus
+);
 
-// DELETE - Delete all completed tasks
-router.delete('/bulk/completed', taskController.deleteCompletedTasks);
+// DELETE - Delete task by ID (must be logged in)
+router.delete('/:id',
+    authenticate,
+    validateObjectId(),
+    taskController.deleteTask
+);
+
+// ==========================================
+// ADMIN ONLY ROUTES
+// ==========================================
+
+// DELETE - Delete all completed tasks (admin only)
+router.delete('/bulk/completed',
+    authenticate,
+    authorize('admin'),              // Only admin can bulk delete
+    taskController.deleteCompletedTasks
+);
 
 module.exports = router;
