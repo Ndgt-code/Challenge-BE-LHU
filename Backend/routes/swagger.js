@@ -5,13 +5,24 @@ const options = {
     definition: {
         openapi: '3.0.0',
         info: {
-            title: 'Task Manager & CRUD API',
-            version: '1.0.0',
-            description: 'API for managing Users, Products, and Tasks',
+            title: 'Task Manager & CRUD API with JWT',
+            version: '2.0.0',
+            description: 'API for managing Users, Products, and Tasks with JWT Authentication',
         },
         servers: [{ url: 'http://localhost:3002' }],
+        // JWT Bearer Authentication
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
+                    description: 'Enter JWT token from login response'
+                }
+            }
+        },
         tags: [
-            { name: 'Auth', description: 'Authentication APIs (Register, Login)' },
+            { name: 'Auth', description: 'Authentication APIs (Register, Login, JWT)' },
             { name: 'Users', description: 'User management APIs' },
             { name: 'Products', description: 'Product management APIs' },
             { name: 'Tasks', description: 'Task management APIs' }
@@ -48,7 +59,8 @@ const options = {
             '/api/auth/login': {
                 post: {
                     tags: ['Auth'],
-                    summary: 'Login user',
+                    summary: 'Login user - Returns JWT tokens',
+                    description: 'Authenticate user and receive access token and refresh token',
                     requestBody: {
                         required: true,
                         content: {
@@ -65,27 +77,76 @@ const options = {
                         }
                     },
                     responses: {
-                        200: { description: 'Login successful' },
+                        200: {
+                            description: 'Login successful - Returns JWT tokens',
+                            content: {
+                                'application/json': {
+                                    schema: {
+                                        type: 'object',
+                                        properties: {
+                                            success: { type: 'boolean', example: true },
+                                            message: { type: 'string', example: 'Login successful!' },
+                                            data: {
+                                                type: 'object',
+                                                properties: {
+                                                    user: { type: 'object' },
+                                                    accessToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+                                                    refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+                                                    expiresIn: { type: 'string', example: '24h' }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
                         401: { description: 'Invalid email or password' }
                     }
                 }
             },
-            '/api/auth/profile/{userId}': {
-                get: {
+            '/api/auth/refresh-token': {
+                post: {
                     tags: ['Auth'],
-                    summary: 'Get user profile',
-                    parameters: [{ name: 'userId', in: 'path', required: true, schema: { type: 'string' } }],
+                    summary: 'Refresh access token',
+                    description: 'Get new access token using refresh token',
+                    requestBody: {
+                        required: true,
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    required: ['refreshToken'],
+                                    properties: {
+                                        refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' }
+                                    }
+                                }
+                            }
+                        }
+                    },
                     responses: {
-                        200: { description: 'User profile retrieved' },
-                        404: { description: 'User not found' }
+                        200: { description: 'Token refreshed successfully' },
+                        401: { description: 'Invalid or expired refresh token' }
                     }
                 }
             },
-            '/api/auth/change-password/{userId}': {
+            '/api/auth/profile': {
+                get: {
+                    tags: ['Auth'],
+                    summary: 'Get current user profile (Protected)',
+                    description: 'Requires valid JWT token in Authorization header',
+                    security: [{ bearerAuth: [] }],
+                    responses: {
+                        200: { description: 'User profile retrieved' },
+                        401: { description: 'No token provided or token invalid' }
+                    }
+                }
+            },
+            '/api/auth/change-password': {
                 put: {
                     tags: ['Auth'],
-                    summary: 'Change user password',
-                    parameters: [{ name: 'userId', in: 'path', required: true, schema: { type: 'string' } }],
+                    summary: 'Change current user password (Protected)',
+                    description: 'Requires valid JWT token in Authorization header',
+                    security: [{ bearerAuth: [] }],
                     requestBody: {
                         required: true,
                         content: {
@@ -104,7 +165,21 @@ const options = {
                     },
                     responses: {
                         200: { description: 'Password changed successfully' },
-                        401: { description: 'Current password is incorrect' }
+                        401: { description: 'Current password is incorrect or no token' }
+                    }
+                }
+            },
+            '/api/auth/users/{userId}': {
+                get: {
+                    tags: ['Auth'],
+                    summary: 'Get user by ID (Admin only)',
+                    description: 'Requires valid JWT token with admin role',
+                    security: [{ bearerAuth: [] }],
+                    parameters: [{ name: 'userId', in: 'path', required: true, schema: { type: 'string' } }],
+                    responses: {
+                        200: { description: 'User profile retrieved' },
+                        403: { description: 'Access denied - Admin role required' },
+                        404: { description: 'User not found' }
                     }
                 }
             },
