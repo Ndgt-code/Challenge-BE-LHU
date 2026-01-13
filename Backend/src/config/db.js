@@ -1,12 +1,21 @@
 const mongoose = require('mongoose');
+require('dotenv').config();
 
 // ==========================================
 // MONGODB CONNECTION
 // ==========================================
+
+// Get values from environment variables
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+const DB_NAME = process.env.DB_NAME || 'dev';
+
 const connectDB = async () => {
     try {
-        await mongoose.connect("mongodb+srv://nguyendanggiangtruong_db_user:hE9AAqVFCB7m8VFs@cluster0.rwda16v.mongodb.net/dev?appName=Cluster0");
-        console.log("✅ MongoDB connected successfully!");
+        // Build connection string with database name
+        const connectionString = `${MONGODB_URI}/${DB_NAME}`;
+
+        await mongoose.connect(connectionString);
+        console.log(`✅ MongoDB connected successfully to database: ${DB_NAME}`);
     } catch (error) {
         console.error("❌ MongoDB connection error:", error.message);
         process.exit(1);
@@ -14,3 +23,4 @@ const connectDB = async () => {
 };
 
 module.exports = connectDB;
+

@@ -24,6 +24,10 @@ connectDB();
 // ==========================================
 app.use(express.json());
 
+// Enable CORS for cross-origin requests
+const cors = require('cors');
+app.use(cors());
+
 // Swagger UI - Access: http://localhost:3002/api-docs
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
@@ -31,6 +35,18 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 // ROUTES
 // ==========================================
 app.use('/api', apiRoutes);
+
+// ==========================================
+// ERROR HANDLING MIDDLEWARE
+// ==========================================
+// Global error handler - catches all unhandled errors
+app.use((err, req, res, next) => {
+    console.error('❌ Unhandled Error:', err.message);
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message || 'Internal Server Error'
+    });
+});
 
 // ==========================================
 // START SERVER

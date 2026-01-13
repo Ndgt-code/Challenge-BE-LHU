@@ -54,22 +54,23 @@ router.patch('/:id/status',
     taskController.updateTaskStatus
 );
 
+// ==========================================
+// ADMIN ONLY ROUTES (must be before /:id routes)
+// ==========================================
+
+// DELETE - Delete all completed tasks (admin only)
+// NOTE: This route MUST be before /:id to avoid being matched as an ID
+router.delete('/bulk/completed',
+    authenticate,
+    authorize('admin'),              // Only admin can bulk delete
+    taskController.deleteCompletedTasks
+);
+
 // DELETE - Delete task by ID (must be logged in)
 router.delete('/:id',
     authenticate,
     validateObjectId(),
     taskController.deleteTask
-);
-
-// ==========================================
-// ADMIN ONLY ROUTES
-// ==========================================
-
-// DELETE - Delete all completed tasks (admin only)
-router.delete('/bulk/completed',
-    authenticate,
-    authorize('admin'),              // Only admin can bulk delete
-    taskController.deleteCompletedTasks
 );
 
 module.exports = router;

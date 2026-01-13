@@ -3,20 +3,20 @@
 // ==========================================
 
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 // ------------------------------------------
-// JWT CONFIGURATION
+// JWT CONFIGURATION (from environment variables)
 // ------------------------------------------
-// In production, use environment variables!
 const JWT_CONFIG = {
-    // Secret key for signing tokens (should be in .env file)
-    SECRET_KEY: 'your-super-secret-jwt-key-change-this-in-production',
+    // Secret key from .env (with fallback for development)
+    SECRET_KEY: process.env.JWT_SECRET || 'dev-secret-key-change-in-production',
 
     // Token expiration time
-    EXPIRES_IN: '24h',  // 24 hours
+    EXPIRES_IN: process.env.JWT_EXPIRES_IN || '24h',
 
-    // Refresh token expiration (optional, for refresh token flow)
-    REFRESH_EXPIRES_IN: '7d'  // 7 days
+    // Refresh token expiration
+    REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '7d'
 };
 
 // ------------------------------------------
