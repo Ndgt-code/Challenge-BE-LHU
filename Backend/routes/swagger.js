@@ -25,7 +25,8 @@ const options = {
             { name: 'Auth', description: 'Authentication APIs (Register, Login, JWT)' },
             { name: 'Users', description: 'User management APIs' },
             { name: 'Products', description: 'Product management APIs' },
-            { name: 'Tasks', description: 'Task management APIs' }
+            { name: 'Tasks', description: 'Task management APIs' },
+            { name: 'Uploads', description: 'File upload APIs' }
         ],
         paths: {
             // ========== AUTH ==========
@@ -553,6 +554,121 @@ const options = {
                     summary: 'Delete all completed tasks (Admin only)',
                     security: [{ bearerAuth: [] }],
                     responses: { 200: { description: 'Completed tasks deleted' }, 403: { description: 'Admin role required' } }
+                }
+            },
+            // ========== UPLOADS ==========
+            '/api/uploads': {
+                get: {
+                    tags: ['Uploads'],
+                    summary: 'Get all uploaded files',
+                    responses: {
+                        200: { description: 'List of uploaded files' }
+                    }
+                }
+            },
+            '/api/uploads/single': {
+                post: {
+                    tags: ['Uploads'],
+                    summary: 'Upload single file',
+                    description: 'Upload a single image or document file (JPEG, PNG, GIF, PDF, DOC, DOCX). Max size: 5MB',
+                    requestBody: {
+                        required: true,
+                        content: {
+                            'multipart/form-data': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        file: {
+                                            type: 'string',
+                                            format: 'binary',
+                                            description: 'File to upload'
+                                        }
+                                    },
+                                    required: ['file']
+                                }
+                            }
+                        }
+                    },
+                    responses: {
+                        200: {
+                            description: 'File uploaded successfully',
+                            content: {
+                                'application/json': {
+                                    schema: {
+                                        type: 'object',
+                                        properties: {
+                                            success: { type: 'boolean', example: true },
+                                            message: { type: 'string', example: 'File uploaded successfully' },
+                                            data: {
+                                                type: 'object',
+                                                properties: {
+                                                    filename: { type: 'string', example: '1234567890-image.jpg' },
+                                                    originalName: { type: 'string', example: 'image.jpg' },
+                                                    mimetype: { type: 'string', example: 'image/jpeg' },
+                                                    size: { type: 'number', example: 102400 },
+                                                    path: { type: 'string', example: '/uploads/1234567890-image.jpg' },
+                                                    url: { type: 'string', example: 'http://localhost:3002/uploads/1234567890-image.jpg' }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        400: { description: 'No file uploaded or invalid file type' },
+                        500: { description: 'Server error' }
+                    }
+                }
+            },
+            '/api/uploads/multiple': {
+                post: {
+                    tags: ['Uploads'],
+                    summary: 'Upload multiple files (max 5)',
+                    description: 'Upload multiple image or document files. Max 5 files per request. Max size: 5MB each',
+                    requestBody: {
+                        required: true,
+                        content: {
+                            'multipart/form-data': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        files: {
+                                            type: 'array',
+                                            items: {
+                                                type: 'string',
+                                                format: 'binary'
+                                            },
+                                            description: 'Files to upload (max 5)'
+                                        }
+                                    },
+                                    required: ['files']
+                                }
+                            }
+                        }
+                    },
+                    responses: {
+                        200: { description: 'Files uploaded successfully' },
+                        400: { description: 'No files uploaded or invalid file type' },
+                        500: { description: 'Server error' }
+                    }
+                }
+            },
+            '/api/uploads/{filename}': {
+                delete: {
+                    tags: ['Uploads'],
+                    summary: 'Delete uploaded file',
+                    parameters: [{
+                        name: 'filename',
+                        in: 'path',
+                        required: true,
+                        schema: { type: 'string' },
+                        description: 'Filename to delete (e.g., 1234567890-image.jpg)'
+                    }],
+                    responses: {
+                        200: { description: 'File deleted successfully' },
+                        404: { description: 'File not found' },
+                        500: { description: 'Server error' }
+                    }
                 }
             }
         }

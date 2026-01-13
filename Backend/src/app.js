@@ -3,6 +3,7 @@
 // ==========================================
 
 const express = require('express');
+const path = require('path');
 const connectDB = require('./config/db');
 
 // Import Swagger (using existing swagger config)
@@ -30,6 +31,9 @@ app.use(cors());
 
 // Swagger UI - Access: http://localhost:3002/api-docs
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+
+// Static file serving for uploads
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // ==========================================
 // ROUTES
@@ -84,6 +88,13 @@ app.listen(PORT, () => {
     console.log('   DELETE /api/products/:id       - Delete product');
     console.log('   DELETE /api/products/one/:id   - Delete product (deleteOne)');
     console.log('   DELETE /api/products/bulk/out-of-stock - Delete out of stock');
+
+    console.log('\n📤 UPLOAD ROUTES:');
+    console.log('   GET    /api/uploads             - Get all uploaded files');
+    console.log('   POST   /api/uploads/single      - Upload single file');
+    console.log('   POST   /api/uploads/multiple    - Upload multiple files (max 5)');
+    console.log('   DELETE /api/uploads/:filename   - Delete a file');
+    console.log('   Static: /uploads/:filename      - Access uploaded files');
 
     console.log('\n📖 Swagger UI: http://localhost:' + PORT + '/api-docs');
     console.log('\n');
