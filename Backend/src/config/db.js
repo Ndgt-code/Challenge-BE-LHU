@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-require('dotenv').config();
+// dotenv is already loaded in app.js
 
 // ==========================================
 // MONGODB CONNECTION

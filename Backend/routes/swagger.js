@@ -130,18 +130,6 @@ const options = {
                     }
                 }
             },
-            '/api/auth/profile': {
-                get: {
-                    tags: ['Auth'],
-                    summary: 'Get current user profile (Protected)',
-                    description: 'Requires valid JWT token in Authorization header',
-                    security: [{ bearerAuth: [] }],
-                    responses: {
-                        200: { description: 'User profile retrieved' },
-                        401: { description: 'No token provided or token invalid' }
-                    }
-                }
-            },
             '/api/auth/change-password': {
                 put: {
                     tags: ['Auth'],
@@ -181,6 +169,166 @@ const options = {
                         200: { description: 'User profile retrieved' },
                         403: { description: 'Access denied - Admin role required' },
                         404: { description: 'User not found' }
+                    }
+                }
+            },
+            '/api/auth/profile': {
+                get: {
+                    tags: ['Auth'],
+                    summary: 'Get current user profile (Protected)',
+                    description: 'Requires valid JWT token in Authorization header',
+                    security: [{ bearerAuth: [] }],
+                    responses: {
+                        200: { description: 'User profile retrieved' },
+                        401: { description: 'No token provided or token invalid' }
+                    }
+                },
+                put: {
+                    tags: ['Auth'],
+                    summary: 'Update current user profile (Protected)',
+                    description: 'Update username. Requires valid JWT token.',
+                    security: [{ bearerAuth: [] }],
+                    requestBody: {
+                        required: true,
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        username: { type: 'string', example: 'newusername', minLength: 3, maxLength: 30 }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    responses: {
+                        200: { description: 'Profile updated successfully' },
+                        400: { description: 'Username already taken or validation failed' },
+                        401: { description: 'No token provided or token invalid' }
+                    }
+                }
+            },
+            '/api/auth/avatar': {
+                put: {
+                    tags: ['Auth'],
+                    summary: 'Upload user avatar (Protected)',
+                    description: 'Upload an image file as user avatar. Requires valid JWT token.',
+                    security: [{ bearerAuth: [] }],
+                    requestBody: {
+                        required: true,
+                        content: {
+                            'multipart/form-data': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        avatar: {
+                                            type: 'string',
+                                            format: 'binary',
+                                            description: 'Image file (JPEG, PNG, GIF, WEBP). Max 5MB'
+                                        }
+                                    },
+                                    required: ['avatar']
+                                }
+                            }
+                        }
+                    },
+                    responses: {
+                        200: {
+                            description: 'Avatar uploaded successfully',
+                            content: {
+                                'application/json': {
+                                    schema: {
+                                        type: 'object',
+                                        properties: {
+                                            success: { type: 'boolean', example: true },
+                                            message: { type: 'string', example: 'Avatar uploaded successfully!' },
+                                            data: {
+                                                type: 'object',
+                                                properties: {
+                                                    avatar: { type: 'string', example: '/uploads/123456-avatar.jpg' },
+                                                    fullUrl: { type: 'string', example: 'http://localhost:3002/uploads/123456-avatar.jpg' }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        400: { description: 'No file uploaded or invalid file type' },
+                        401: { description: 'No token provided or token invalid' }
+                    }
+                }
+            },
+            '/api/auth/forgot-password': {
+                post: {
+                    tags: ['Auth'],
+                    summary: 'Request password reset token',
+                    description: 'Generates a 6-digit reset token. In development, token is returned in response. In production, it would be sent via email.',
+                    requestBody: {
+                        required: true,
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    required: ['email'],
+                                    properties: {
+                                        email: { type: 'string', format: 'email', example: 'john@example.com' }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    responses: {
+                        200: {
+                            description: 'Reset token generated',
+                            content: {
+                                'application/json': {
+                                    schema: {
+                                        type: 'object',
+                                        properties: {
+                                            success: { type: 'boolean', example: true },
+                                            message: { type: 'string' },
+                                            data: {
+                                                type: 'object',
+                                                properties: {
+                                                    email: { type: 'string', example: 'john@example.com' },
+                                                    resetToken: { type: 'string', example: '123456' },
+                                                    expiresIn: { type: 'string', example: '1 hour' }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            '/api/auth/reset-password': {
+                post: {
+                    tags: ['Auth'],
+                    summary: 'Reset password with token',
+                    description: 'Use the 6-digit token from forgot-password to set a new password',
+                    requestBody: {
+                        required: true,
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    required: ['email', 'token', 'newPassword', 'confirmNewPassword'],
+                                    properties: {
+                                        email: { type: 'string', format: 'email', example: 'john@example.com' },
+                                        token: { type: 'string', example: '123456', description: '6-digit reset token' },
+                                        newPassword: { type: 'string', example: 'newpass123', minLength: 6 },
+                                        confirmNewPassword: { type: 'string', example: 'newpass123' }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    responses: {
+                        200: { description: 'Password reset successfully' },
+                        400: { description: 'Invalid token, expired token, or validation failed' }
                     }
                 }
             },

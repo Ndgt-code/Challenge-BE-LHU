@@ -11,7 +11,10 @@ const { validate, validateObjectId } = require('../middlewares/validate');
 const {
     registerSchema,
     loginSchema,
-    changePasswordSchema
+    changePasswordSchema,
+    updateProfileSchema,
+    forgotPasswordSchema,
+    resetPasswordSchema
 } = require('../validations/authValidation');
 
 // Import JWT authentication middleware
@@ -30,6 +33,12 @@ router.post('/login', validate(loginSchema), authController.login);
 // POST /api/auth/refresh-token - Get new access token using refresh token
 router.post('/refresh-token', authController.refreshToken);
 
+// POST /api/auth/forgot-password - Request password reset token
+router.post('/forgot-password', validate(forgotPasswordSchema), authController.forgotPassword);
+
+// POST /api/auth/reset-password - Reset password with token
+router.post('/reset-password', validate(resetPasswordSchema), authController.resetPassword);
+
 // ------------------------------------------
 // PROTECTED ROUTES (JWT Authentication required)
 // ------------------------------------------
@@ -37,12 +46,33 @@ router.post('/refresh-token', authController.refreshToken);
 // GET /api/auth/profile - Get current user's profile (requires valid JWT)
 router.get('/profile', authenticate, authController.getProfile);
 
+// PUT /api/auth/profile - Update current user's profile
+router.put(
+    '/profile',
+    authenticate,
+    validate(updateProfileSchema),
+    authController.updateProfile
+);
+
 // PUT /api/auth/change-password - Change current user's password
 router.put(
     '/change-password',
     authenticate,
     validate(changePasswordSchema),
     authController.changePassword
+);
+
+// ------------------------------------------
+// AVATAR UPLOAD ROUTE
+// ------------------------------------------
+const upload = require('../config/multer');
+
+// PUT /api/auth/avatar - Upload user avatar
+router.put(
+    '/avatar',
+    authenticate,
+    upload.single('avatar'),
+    authController.uploadAvatar
 );
 
 // ------------------------------------------

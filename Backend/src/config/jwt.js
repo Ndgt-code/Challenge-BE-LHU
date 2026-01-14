@@ -3,7 +3,7 @@
 // ==========================================
 
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
+// dotenv is already loaded in app.js
 
 // ------------------------------------------
 // JWT CONFIGURATION (from environment variables)
@@ -18,6 +18,9 @@ const JWT_CONFIG = {
     // Refresh token expiration
     REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '7d'
 };
+
+// Debug log - remove in production
+console.log('🔑 JWT_SECRET loaded:', process.env.JWT_SECRET ? 'YES (from .env)' : 'NO (using fallback)');
 
 // ------------------------------------------
 // GENERATE ACCESS TOKEN

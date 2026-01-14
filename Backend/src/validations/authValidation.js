@@ -104,8 +104,86 @@ const changePasswordSchema = Joi.object({
         })
 });
 
+// ------------------------------------------
+// Schema for updating profile
+// ------------------------------------------
+const updateProfileSchema = Joi.object({
+    username: Joi.string()
+        .alphanum()
+        .min(3)
+        .max(30)
+        .optional()
+        .messages({
+            'string.alphanum': 'Username must only contain letters and numbers',
+            'string.min': 'Username must be at least 3 characters',
+            'string.max': 'Username must not exceed 30 characters'
+        })
+});
+
+// ------------------------------------------
+// Schema for forgot password
+// ------------------------------------------
+const forgotPasswordSchema = Joi.object({
+    email: Joi.string()
+        .email()
+        .required()
+        .messages({
+            'string.empty': 'Email is required',
+            'string.email': 'Please enter a valid email address',
+            'any.required': 'Email is required'
+        })
+});
+
+// ------------------------------------------
+// Schema for reset password
+// ------------------------------------------
+const resetPasswordSchema = Joi.object({
+    email: Joi.string()
+        .email()
+        .required()
+        .messages({
+            'string.empty': 'Email is required',
+            'string.email': 'Please enter a valid email address',
+            'any.required': 'Email is required'
+        }),
+
+    token: Joi.string()
+        .length(6)
+        .pattern(/^[0-9]+$/)
+        .required()
+        .messages({
+            'string.empty': 'Reset token is required',
+            'string.length': 'Reset token must be 6 digits',
+            'string.pattern.base': 'Reset token must contain only numbers',
+            'any.required': 'Reset token is required'
+        }),
+
+    newPassword: Joi.string()
+        .min(6)
+        .max(50)
+        .required()
+        .messages({
+            'string.empty': 'New password is required',
+            'string.min': 'New password must be at least 6 characters',
+            'string.max': 'New password must not exceed 50 characters',
+            'any.required': 'New password is required'
+        }),
+
+    confirmNewPassword: Joi.string()
+        .valid(Joi.ref('newPassword'))
+        .required()
+        .messages({
+            'string.empty': 'Confirm new password is required',
+            'any.only': 'New passwords do not match',
+            'any.required': 'Confirm new password is required'
+        })
+});
+
 module.exports = {
     registerSchema,
     loginSchema,
-    changePasswordSchema
+    changePasswordSchema,
+    updateProfileSchema,
+    forgotPasswordSchema,
+    resetPasswordSchema
 };

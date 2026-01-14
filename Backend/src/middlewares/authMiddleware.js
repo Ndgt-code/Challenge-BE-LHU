@@ -17,6 +17,9 @@ const authenticate = async (req, res, next) => {
         // Get token from header
         const authHeader = req.headers.authorization;
 
+        // DEBUG LOG
+        console.log('🔍 Auth Header:', authHeader ? authHeader.substring(0, 50) + '...' : 'NO HEADER');
+
         if (!authHeader) {
             return res.status(401).json({
                 success: false,
@@ -35,8 +38,12 @@ const authenticate = async (req, res, next) => {
         // Extract token (remove "Bearer " prefix)
         const token = authHeader.split(' ')[1];
 
+        // DEBUG LOG
+        console.log('🔍 Token (first 20 chars):', token ? token.substring(0, 20) : 'NO TOKEN');
+
         // Verify token
         const decoded = verifyToken(token);
+        console.log('✅ Token decoded successfully, userId:', decoded.userId);
 
         // Find user from token payload
         const user = await AuthUser.findById(decoded.userId);

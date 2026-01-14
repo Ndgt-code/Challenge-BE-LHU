@@ -2,8 +2,11 @@
 // MAIN APPLICATION - MVC Pattern
 // ==========================================
 
-const express = require('express');
+// IMPORTANT: Load dotenv FIRST before any other imports
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
+
+const express = require('express');
 const connectDB = require('./config/db');
 
 // Import Swagger (using existing swagger config)

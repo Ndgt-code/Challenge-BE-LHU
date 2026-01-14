@@ -47,6 +47,24 @@ const authUserSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
+    },
+
+    // Avatar URL
+    avatar: {
+        type: String,
+        default: null
+    },
+
+    // Reset Password Token (6-digit code)
+    resetPasswordToken: {
+        type: String,
+        default: null
+    },
+
+    // Reset Password Token Expiration
+    resetPasswordExpires: {
+        type: Date,
+        default: null
     }
 }, {
     timestamps: true
