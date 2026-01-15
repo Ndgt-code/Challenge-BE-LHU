@@ -6,12 +6,23 @@ const Product = require('../models/Product');
 const { successResponse, errorResponse, listResponse, deleteManyResponse } = require('../views/responseHelper');
 
 // ------------------------------------------
-// GET all products
+// GET all products (with pagination, sorting, filtering, searching)
 // ------------------------------------------
 const getAllProducts = async (req, res) => {
     try {
-        const products = await Product.find();
-        return listResponse(res, products);
+        const { buildAdvancedQuery } = require('../utils/queryBuilder');
+
+        const { data, pagination } = await buildAdvancedQuery(Product, req.query, {
+            searchFields: ['name', 'description', 'category'], // Fields to search in
+            select: '-__v' // Exclude __v field
+        });
+
+        return res.json({
+            success: true,
+            message: 'Products retrieved successfully',
+            data,
+            pagination
+        });
     } catch (error) {
         return errorResponse(res, error.message, 500);
     }

@@ -336,8 +336,17 @@ const options = {
             '/api/users': {
                 get: {
                     tags: ['Users'],
-                    summary: 'Get all users',
-                    responses: { 200: { description: 'List of users' } }
+                    summary: 'Get all users (with Advanced Query)',
+                    description: 'Supports pagination, sorting, filtering, and searching',
+                    parameters: [
+                        { name: 'page', in: 'query', schema: { type: 'integer', default: 1 }, description: 'Page number' },
+                        { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 }, description: 'Items per page' },
+                        { name: 'sort', in: 'query', schema: { type: 'string', default: 'createdAt' }, description: 'Field to sort by' },
+                        { name: 'order', in: 'query', schema: { type: 'string', enum: ['asc', 'desc'], default: 'desc' }, description: 'Sort order' },
+                        { name: 'search', in: 'query', schema: { type: 'string' }, description: 'Search in name, email' },
+                        { name: 'isActive', in: 'query', schema: { type: 'boolean' }, description: 'Filter by active status' }
+                    ],
+                    responses: { 200: { description: 'List of users with pagination info' } }
                 },
                 post: {
                     tags: ['Users'],
@@ -493,8 +502,17 @@ const options = {
             '/api/products': {
                 get: {
                     tags: ['Products'],
-                    summary: 'Get all products',
-                    responses: { 200: { description: 'List of products' } }
+                    summary: 'Get all products (with Advanced Query)',
+                    description: 'Supports pagination, sorting, filtering, and searching',
+                    parameters: [
+                        { name: 'page', in: 'query', schema: { type: 'integer', default: 1 }, description: 'Page number' },
+                        { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 }, description: 'Items per page' },
+                        { name: 'sort', in: 'query', schema: { type: 'string', default: 'createdAt' }, description: 'Field to sort by' },
+                        { name: 'order', in: 'query', schema: { type: 'string', enum: ['asc', 'desc'], default: 'desc' }, description: 'Sort order' },
+                        { name: 'search', in: 'query', schema: { type: 'string' }, description: 'Search in name, description, category' },
+                        { name: 'category', in: 'query', schema: { type: 'string', enum: ['electronics', 'clothing', 'food', 'other'] }, description: 'Filter by category' }
+                    ],
+                    responses: { 200: { description: 'List of products with pagination info' } }
                 },
                 post: {
                     tags: ['Products'],

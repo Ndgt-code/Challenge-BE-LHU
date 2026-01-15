@@ -6,12 +6,23 @@ const User = require('../models/User');
 const { successResponse, errorResponse, listResponse, updateManyResponse, deleteManyResponse } = require('../views/responseHelper');
 
 // ------------------------------------------
-// GET all users
+// GET all users (with pagination, sorting, filtering, searching)
 // ------------------------------------------
 const getAllUsers = async (req, res) => {
     try {
-        const users = await User.find();
-        return listResponse(res, users);
+        const { buildAdvancedQuery } = require('../utils/queryBuilder');
+
+        const { data, pagination } = await buildAdvancedQuery(User, req.query, {
+            searchFields: ['name', 'email'], // Fields to search in
+            select: '-__v' // Exclude __v field
+        });
+
+        return res.json({
+            success: true,
+            message: 'Users retrieved successfully',
+            data,
+            pagination
+        });
     } catch (error) {
         return errorResponse(res, error.message, 500);
     }
