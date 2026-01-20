@@ -7,7 +7,9 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const express = require('express');
-const connectDB = require('./config/db');
+
+// Import centralized config
+const { server, connectDB, logConfigStatus } = require('./config');
 
 // Import Swagger (using existing swagger config)
 const { swaggerUi, specs } = require('../routes/swagger');
@@ -16,7 +18,11 @@ const { swaggerUi, specs } = require('../routes/swagger');
 const apiRoutes = require('./routes');
 
 const app = express();
-const PORT = 3002;
+
+// ==========================================
+// CONFIGURATION STATUS
+// ==========================================
+logConfigStatus();
 
 // ==========================================
 // DATABASE CONNECTION
@@ -58,6 +64,7 @@ app.use((err, req, res, next) => {
 // ==========================================
 // START SERVER
 // ==========================================
+const PORT = server.port;
 app.listen(PORT, () => {
     console.log('='.repeat(65));
     console.log(`🚀 MVC Server: http://localhost:${PORT}`);

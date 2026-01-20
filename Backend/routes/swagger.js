@@ -836,157 +836,156 @@ const options = {
                         500: { description: 'Server error' }
                     }
                 }
-            }
-        },
-        // ========== POSTS ==========
-        '/api/posts': {
-            get: {
-                tags: ['Posts'],
-                summary: 'Get all posts (with pagination & populate)',
-                parameters: [
-                    { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
-                    { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
-                    { name: 'sort', in: 'query', schema: { type: 'string', default: 'createdAt' } },
-                    { name: 'order', in: 'query', schema: { type: 'string', enum: ['asc', 'desc'] } },
-                    { name: 'search', in: 'query', schema: { type: 'string' } },
-                    { name: 'status', in: 'query', schema: { type: 'string', enum: ['draft', 'published', 'archived'] } }
-                ],
-                responses: { 200: { description: 'List of posts with author info' } }
             },
-            post: {
-                tags: ['Posts'],
-                summary: 'Create new post (Protected)',
-                security: [{ bearerAuth: [] }],
-                requestBody: {
-                    required: true,
-                    content: {
-                        'application/json': {
-                            schema: {
-                                type: 'object',
-                                required: ['title', 'content'],
-                                properties: {
-                                    title: { type: 'string', example: 'My First Post' },
-                                    content: { type: 'string', example: 'This is the content...' },
-                                    tags: { type: 'array', items: { type: 'string' }, example: ['nodejs', 'mongodb'] },
-                                    status: { type: 'string', enum: ['draft', 'published'], default: 'published' }
+            // ========== POSTS ==========
+            '/api/posts': {
+                get: {
+                    tags: ['Posts'],
+                    summary: 'Get all posts (with pagination & populate)',
+                    parameters: [
+                        { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+                        { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
+                        { name: 'sort', in: 'query', schema: { type: 'string', default: 'createdAt' } },
+                        { name: 'order', in: 'query', schema: { type: 'string', enum: ['asc', 'desc'] } },
+                        { name: 'search', in: 'query', schema: { type: 'string' } },
+                        { name: 'status', in: 'query', schema: { type: 'string', enum: ['draft', 'published', 'archived'] } }
+                    ],
+                    responses: { 200: { description: 'List of posts with author info' } }
+                },
+                post: {
+                    tags: ['Posts'],
+                    summary: 'Create new post (Protected)',
+                    security: [{ bearerAuth: [] }],
+                    requestBody: {
+                        required: true,
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    required: ['title', 'content'],
+                                    properties: {
+                                        title: { type: 'string', example: 'My First Post' },
+                                        content: { type: 'string', example: 'This is the content...' },
+                                        tags: { type: 'array', items: { type: 'string' }, example: ['nodejs', 'mongodb'] },
+                                        status: { type: 'string', enum: ['draft', 'published'], default: 'published' }
+                                    }
                                 }
                             }
                         }
-                    }
-                },
-                responses: { 201: { description: 'Post created with author populated' } }
-            }
-        },
-        '/api/posts/{id}': {
-            get: {
-                tags: ['Posts'],
-                summary: 'Get post by ID (with comments)',
-                parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-                responses: { 200: { description: 'Post with author and comments' } }
+                    },
+                    responses: { 201: { description: 'Post created with author populated' } }
+                }
             },
-            put: {
-                tags: ['Posts'],
-                summary: 'Update post (Protected - Author only)',
-                security: [{ bearerAuth: [] }],
-                parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-                requestBody: {
-                    content: {
-                        'application/json': {
-                            schema: {
-                                type: 'object',
-                                properties: {
-                                    title: { type: 'string' },
-                                    content: { type: 'string' },
-                                    status: { type: 'string', enum: ['draft', 'published', 'archived'] }
+            '/api/posts/{id}': {
+                get: {
+                    tags: ['Posts'],
+                    summary: 'Get post by ID (with comments)',
+                    parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+                    responses: { 200: { description: 'Post with author and comments' } }
+                },
+                put: {
+                    tags: ['Posts'],
+                    summary: 'Update post (Protected - Author only)',
+                    security: [{ bearerAuth: [] }],
+                    parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+                    requestBody: {
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        title: { type: 'string' },
+                                        content: { type: 'string' },
+                                        status: { type: 'string', enum: ['draft', 'published', 'archived'] }
+                                    }
                                 }
                             }
                         }
-                    }
+                    },
+                    responses: { 200: { description: 'Post updated' } }
                 },
-                responses: { 200: { description: 'Post updated' } }
+                delete: {
+                    tags: ['Posts'],
+                    summary: 'Delete post with cascade (Protected)',
+                    security: [{ bearerAuth: [] }],
+                    parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+                    responses: { 200: { description: 'Post and comments deleted' } }
+                }
             },
-            delete: {
-                tags: ['Posts'],
-                summary: 'Delete post with cascade (Protected)',
-                security: [{ bearerAuth: [] }],
-                parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-                responses: { 200: { description: 'Post and comments deleted' } }
-            }
-        },
-        '/api/posts/{id}/like': {
-            post: {
-                tags: ['Posts'],
-                summary: 'Like/Unlike post (Protected)',
-                security: [{ bearerAuth: [] }],
-                parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-                responses: { 200: { description: 'Like toggled' } }
-            }
-        },
-        '/api/posts/user/{userId}': {
-            get: {
-                tags: ['Posts'],
-                summary: 'Get posts by user ID',
-                parameters: [{ name: 'userId', in: 'path', required: true, schema: { type: 'string' } }],
-                responses: { 200: { description: 'List of user posts' } }
-            }
-        },
-        '/api/posts/{postId}/comments': {
-            get: {
-                tags: ['Comments'],
-                summary: 'Get comments for a post',
-                parameters: [{ name: 'postId', in: 'path', required: true, schema: { type: 'string' } }],
-                responses: { 200: { description: 'List of comments' } }
+            '/api/posts/{id}/like': {
+                post: {
+                    tags: ['Posts'],
+                    summary: 'Like/Unlike post (Protected)',
+                    security: [{ bearerAuth: [] }],
+                    parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+                    responses: { 200: { description: 'Like toggled' } }
+                }
             },
-            post: {
-                tags: ['Comments'],
-                summary: 'Add comment to post (Protected)',
-                security: [{ bearerAuth: [] }],
-                parameters: [{ name: 'postId', in: 'path', required: true, schema: { type: 'string' } }],
-                requestBody: {
-                    required: true,
-                    content: {
-                        'application/json': {
-                            schema: {
-                                type: 'object',
-                                required: ['content'],
-                                properties: {
-                                    content: { type: 'string', example: 'Great post!' }
+            '/api/posts/user/{userId}': {
+                get: {
+                    tags: ['Posts'],
+                    summary: 'Get posts by user ID',
+                    parameters: [{ name: 'userId', in: 'path', required: true, schema: { type: 'string' } }],
+                    responses: { 200: { description: 'List of user posts' } }
+                }
+            },
+            '/api/posts/{postId}/comments': {
+                get: {
+                    tags: ['Comments'],
+                    summary: 'Get comments for a post',
+                    parameters: [{ name: 'postId', in: 'path', required: true, schema: { type: 'string' } }],
+                    responses: { 200: { description: 'List of comments' } }
+                },
+                post: {
+                    tags: ['Comments'],
+                    summary: 'Add comment to post (Protected)',
+                    security: [{ bearerAuth: [] }],
+                    parameters: [{ name: 'postId', in: 'path', required: true, schema: { type: 'string' } }],
+                    requestBody: {
+                        required: true,
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    required: ['content'],
+                                    properties: {
+                                        content: { type: 'string', example: 'Great post!' }
+                                    }
                                 }
                             }
                         }
-                    }
-                },
-                responses: { 201: { description: 'Comment added' } }
-            }
-        },
-        '/api/posts/comments/{id}': {
-            put: {
-                tags: ['Comments'],
-                summary: 'Update comment (Protected)',
-                security: [{ bearerAuth: [] }],
-                parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-                requestBody: {
-                    content: {
-                        'application/json': {
-                            schema: {
-                                type: 'object',
-                                properties: { content: { type: 'string' } }
+                    },
+                    responses: { 201: { description: 'Comment added' } }
+                }
+            },
+            '/api/posts/comments/{id}': {
+                put: {
+                    tags: ['Comments'],
+                    summary: 'Update comment (Protected)',
+                    security: [{ bearerAuth: [] }],
+                    parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+                    requestBody: {
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: { content: { type: 'string' } }
+                                }
                             }
                         }
-                    }
+                    },
+                    responses: { 200: { description: 'Comment updated' } }
                 },
-                responses: { 200: { description: 'Comment updated' } }
-            },
-            delete: {
-                tags: ['Comments'],
-                summary: 'Delete comment (Protected)',
-                security: [{ bearerAuth: [] }],
-                parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-                responses: { 200: { description: 'Comment deleted' } }
+                delete: {
+                    tags: ['Comments'],
+                    summary: 'Delete comment (Protected)',
+                    security: [{ bearerAuth: [] }],
+                    parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+                    responses: { 200: { description: 'Comment deleted' } }
+                }
             }
         }
-    }
-},
+    },
     apis: []
 };
 

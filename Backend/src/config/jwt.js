@@ -3,24 +3,22 @@
 // ==========================================
 
 const jwt = require('jsonwebtoken');
-// dotenv is already loaded in app.js
 
 // ------------------------------------------
-// JWT CONFIGURATION (from environment variables)
+// JWT CONFIGURATION (frozen to prevent modifications)
 // ------------------------------------------
+const jwtConfig = Object.freeze({
+    secretKey: process.env.JWT_SECRET || 'dev-secret-key-change-in-production',
+    expiresIn: process.env.JWT_EXPIRES_IN || '24h',
+    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d'
+});
+
+// Legacy export for backward compatibility
 const JWT_CONFIG = {
-    // Secret key from .env (with fallback for development)
-    SECRET_KEY: process.env.JWT_SECRET || 'dev-secret-key-change-in-production',
-
-    // Token expiration time
-    EXPIRES_IN: process.env.JWT_EXPIRES_IN || '24h',
-
-    // Refresh token expiration
-    REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '7d'
+    SECRET_KEY: jwtConfig.secretKey,
+    EXPIRES_IN: jwtConfig.expiresIn,
+    REFRESH_EXPIRES_IN: jwtConfig.refreshExpiresIn
 };
-
-// Debug log - remove in production
-console.log('🔑 JWT_SECRET loaded:', process.env.JWT_SECRET ? 'YES (from .env)' : 'NO (using fallback)');
 
 // ------------------------------------------
 // GENERATE ACCESS TOKEN
@@ -92,6 +90,7 @@ const decodeToken = (token) => {
 };
 
 module.exports = {
+    jwtConfig,
     JWT_CONFIG,
     generateToken,
     generateRefreshToken,
