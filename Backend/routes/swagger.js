@@ -7,10 +7,35 @@ const options = {
         info: {
             title: 'Task Manager & CRUD API with JWT',
             version: '2.0.0',
-            description: 'API for managing Users, Products, and Tasks with JWT Authentication',
+            description: `
+## API Documentation
+
+RESTful API for managing Users, Products, Tasks, and Posts with JWT Authentication.
+
+### Authentication
+- Use \`/api/auth/login\` to get access token
+- Click **Authorize** button and enter: \`Bearer <your_access_token>\`
+
+### Common Response Codes
+| Code | Description |
+|------|-------------|
+| 200 | Success |
+| 201 | Created |
+| 400 | Bad Request - Validation Error |
+| 401 | Unauthorized - Invalid/Missing Token |
+| 403 | Forbidden - Insufficient Permissions |
+| 404 | Not Found |
+| 500 | Internal Server Error |
+            `,
+            contact: {
+                name: 'API Support',
+                email: 'support@example.com'
+            }
         },
-        servers: [{ url: 'http://localhost:3002' }],
-        // JWT Bearer Authentication
+        servers: [
+            { url: 'http://localhost:3002', description: 'Development Server' }
+        ],
+        // Components: Schemas, Security, Responses
         components: {
             securitySchemes: {
                 bearerAuth: {
@@ -19,14 +44,101 @@ const options = {
                     bearerFormat: 'JWT',
                     description: 'Enter JWT token from login response'
                 }
+            },
+            schemas: {
+                // User Schema
+                User: {
+                    type: 'object',
+                    properties: {
+                        _id: { type: 'string', example: '507f1f77bcf86cd799439011' },
+                        username: { type: 'string', example: 'johndoe' },
+                        email: { type: 'string', example: 'john@example.com' },
+                        role: { type: 'string', enum: ['user', 'admin'], example: 'user' },
+                        isActive: { type: 'boolean', example: true },
+                        createdAt: { type: 'string', format: 'date-time' }
+                    }
+                },
+                // Product Schema
+                Product: {
+                    type: 'object',
+                    properties: {
+                        _id: { type: 'string', example: '507f1f77bcf86cd799439012' },
+                        name: { type: 'string', example: 'iPhone 15' },
+                        price: { type: 'number', example: 999 },
+                        description: { type: 'string', example: 'Latest iPhone model' },
+                        category: { type: 'string', enum: ['electronics', 'clothing', 'food', 'other'] },
+                        stock: { type: 'integer', example: 100 }
+                    }
+                },
+                // Post Schema
+                Post: {
+                    type: 'object',
+                    properties: {
+                        _id: { type: 'string' },
+                        title: { type: 'string', example: 'My First Post' },
+                        content: { type: 'string', example: 'Post content here...' },
+                        author: { $ref: '#/components/schemas/User' },
+                        likesCount: { type: 'integer', example: 5 },
+                        status: { type: 'string', enum: ['draft', 'published', 'archived'] },
+                        createdAt: { type: 'string', format: 'date-time' }
+                    }
+                },
+                // Error Response Schema
+                Error: {
+                    type: 'object',
+                    properties: {
+                        success: { type: 'boolean', example: false },
+                        message: { type: 'string', example: 'Error message here' }
+                    }
+                },
+                // Success Response Schema
+                Success: {
+                    type: 'object',
+                    properties: {
+                        success: { type: 'boolean', example: true },
+                        message: { type: 'string', example: 'Operation successful' },
+                        data: { type: 'object' }
+                    }
+                }
+            },
+            responses: {
+                UnauthorizedError: {
+                    description: 'Access token is missing or invalid',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/Error' },
+                            example: { success: false, message: 'Access denied. No token provided.' }
+                        }
+                    }
+                },
+                NotFoundError: {
+                    description: 'Resource not found',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/Error' },
+                            example: { success: false, message: 'Resource not found' }
+                        }
+                    }
+                },
+                ValidationError: {
+                    description: 'Validation failed',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/Error' },
+                            example: { success: false, message: 'Validation error details' }
+                        }
+                    }
+                }
             }
         },
         tags: [
-            { name: 'Auth', description: 'Authentication APIs (Register, Login, JWT)' },
-            { name: 'Users', description: 'User management APIs' },
-            { name: 'Products', description: 'Product management APIs' },
-            { name: 'Tasks', description: 'Task management APIs' },
-            { name: 'Uploads', description: 'File upload APIs' }
+            { name: 'Auth', description: '🔐 Authentication - Register, Login, JWT tokens' },
+            { name: 'Users', description: '👥 User management - CRUD operations' },
+            { name: 'Products', description: '📦 Product management - CRUD operations' },
+            { name: 'Tasks', description: '✅ Task management - Todo list operations' },
+            { name: 'Posts', description: '📝 Posts - Blog posts with comments' },
+            { name: 'Comments', description: '💬 Comments on posts' },
+            { name: 'Uploads', description: '📤 File upload management' }
         ],
         paths: {
             // ========== AUTH ==========
@@ -34,6 +146,7 @@ const options = {
                 post: {
                     tags: ['Auth'],
                     summary: 'Register new user',
+                    description: 'Create a new user account with username, email and password',
                     requestBody: {
                         required: true,
                         content: {
@@ -52,8 +165,24 @@ const options = {
                         }
                     },
                     responses: {
-                        201: { description: 'User registered successfully' },
-                        400: { description: 'Validation failed or email/username already exists' }
+                        201: {
+                            description: 'User registered successfully',
+                            content: {
+                                'application/json': {
+                                    example: {
+                                        success: true,
+                                        message: 'User registered successfully!',
+                                        data: {
+                                            _id: '507f1f77bcf86cd799439011',
+                                            username: 'johndoe',
+                                            email: 'john@example.com',
+                                            role: 'user'
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        400: { $ref: '#/components/responses/ValidationError' }
                     }
                 }
             },
