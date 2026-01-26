@@ -39,7 +39,10 @@ const cors = require('cors');
 app.use(cors());
 
 // Swagger UI - Access: http://localhost:3002/api-docs
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+    customSiteTitle: "Challenge BE API Docs",
+    customfavIcon: "/favicon.ico"
+}));
 
 // Static file serving for uploads
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));

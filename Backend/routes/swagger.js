@@ -33,6 +33,7 @@ RESTful API for managing Users, Products, Tasks, and Posts with JWT Authenticati
             }
         },
         servers: [
+            { url: 'https://challenge-be-lhu-ndgt.onrender.com', description: 'Production Server' },
             { url: 'http://localhost:3002', description: 'Development Server' }
         ],
         // Components: Schemas, Security, Responses
