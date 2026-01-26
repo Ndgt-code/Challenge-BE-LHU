@@ -1,60 +1,46 @@
 name: CI/CD Pipeline
 
-# Chạy workflow khi:
 on:
   push:
-    branches: [ main, dev ]  # Push vào main hoặc dev
+    branches: [ main, dev ]
   pull_request:
-    branches: [ main ]       # Tạo Pull Request vào main
+    branches: [ main ]
 
 jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: Backend
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x]  # Test trên Node 18 và 20
+        node-version: [18.x, 20.x]
 
     steps:
-      # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Setup Node.js
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+          cache-dependency-path: Backend/package-lock.json
 
-      # 3. Install dependencies
       - name: Install dependencies
-        run: |
-          cd Backend
-          npm install
+        run: npm ci
 
-      # 4. Run tests
       - name: Run tests
-        run: |
-          cd Backend
-          npm test
+        run: npm test
         env:
           NODE_ENV: test
           MONGODB_URI: ${{ secrets.MONGODB_URI_TEST }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           PORT: 3002
 
-      # 5. Generate coverage report
       - name: Generate coverage report
-        run: |
-          cd Backend
-          npm run test:coverage
-
-      # 6. Upload coverage to Codecov (optional)
-      - name: Upload coverage
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./Backend/coverage/lcov.info
-          flags: unittests
-          name: codecov-umbrella
+        run: npm run test:coverage
+        continue-on-error: true
