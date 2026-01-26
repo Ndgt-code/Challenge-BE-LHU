@@ -23,7 +23,7 @@ describe('Users API', () => {
                 .get('/api/users');
 
             expect(res.status).toBe(200);
-            expect(res.body.success).toBe(true);
+            expect(res.body).toHaveProperty('data');
             expect(Array.isArray(res.body.data)).toBe(true);
         });
     });
@@ -34,13 +34,13 @@ describe('Users API', () => {
             const res = await request(app)
                 .post('/api/users')
                 .send({
-                    username: `newuser${Date.now()}`,
+                    name: `Test User ${Date.now()}`,
                     email: uniqueEmail,
-                    password: '123456'
+                    age: 25
                 });
 
             expect(res.status).toBe(201);
-            expect(res.body.success).toBe(true);
+            expect(res.body.message).toBe('User created successfully!');
             expect(res.body.data.email).toBe(uniqueEmail);
 
             // Save user ID for later tests
@@ -55,7 +55,7 @@ describe('Users API', () => {
                 });
 
             expect(res.status).toBe(400);
-            expect(res.body.success).toBe(false);
+            expect(res.body).toHaveProperty('error');
         });
     });
 
@@ -64,19 +64,19 @@ describe('Users API', () => {
             const res = await request(app)
                 .put(`/api/users/${testUserId}`)
                 .send({
-                    username: 'updatedUsername'
+                    name: 'Updated Name'
                 });
 
             expect(res.status).toBe(200);
-            expect(res.body.success).toBe(true);
-            expect(res.body.data.username).toBe('updatedUsername');
+            expect(res.body.message).toBe('User updated successfully!');
+            expect(res.body.data.name).toBe('Updated Name');
         });
 
         test('Should fail with invalid ID', async () => {
             const res = await request(app)
                 .put('/api/users/invalid-id')
                 .send({
-                    username: 'test'
+                    name: 'test'
                 });
 
             expect(res.status).toBe(400);
@@ -89,7 +89,7 @@ describe('Users API', () => {
                 .delete(`/api/users/${testUserId}`);
 
             expect(res.status).toBe(200);
-            expect(res.body.success).toBe(true);
+            expect(res.body.message).toBe('User deleted successfully!');
         });
 
         test('Should fail with non-existent ID', async () => {
