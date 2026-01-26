@@ -1,0 +1,21 @@
+# Render Blueprint - Auto-deploy configuration
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: challenge-be-lhu-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3002
+      - key: MONGODB_URI
+        sync: false  # Set manually in Render dashboard
+      - key: DB_NAME
+        sync: false
+      - key: JWT_SECRET
+        sync: false

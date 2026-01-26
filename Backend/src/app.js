@@ -65,9 +65,12 @@ app.use((err, req, res, next) => {
 // START SERVER
 // ==========================================
 const PORT = server.port;
-app.listen(PORT, () => {
+const HOST = server.isProduction ? '0.0.0.0' : 'localhost';
+
+app.listen(PORT, HOST, () => {
     console.log('='.repeat(65));
-    console.log(`🚀 MVC Server: http://localhost:${PORT}`);
+    console.log(`🚀 MVC Server: http://${HOST}:${PORT}`);
+    console.log(`   Environment: ${server.nodeEnv}`);
     console.log('='.repeat(65));
 
     console.log('\n📁 MVC STRUCTURE:');

@@ -1,11 +1,12 @@
 {
   "name": "challenge-be-lhu",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "RESTful API for Task Manager with JWT Authentication",
+  "main": "src/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node express-basic/app.js"
+    "start": "node src/app.js",
+    "dev": "node src/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
