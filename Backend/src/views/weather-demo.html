@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>API Dự Báo Thời Tiết - Weather Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ==================== CSS VARIABLES ==================== */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7db9e8 100%);
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-bg-light: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.9);
+            --shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.2);
+            --shadow-hover: 0 8px 24px 0 rgba(31, 38, 135, 0.3);
+        }
+
+        /* ==================== RESET & BASE ==================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 15px;
+        }
+
+        /* ==================== CONTAINER ==================== */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* ==================== HEADER ==================== */
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+
+        /* ==================== SEARCH SECTION ==================== */
+        .search-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .search-controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 220px;
+            padding: 12px 16px;
+            border: 2px solid var(--glass-border);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.6);
+            background: var(--glass-bg-light);
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn-secondary {
+            background: var(--glass-bg);
+            color: white;
+            border: 2px solid var(--glass-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--glass-bg-light);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ==================== LOADING ==================== */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 15px;
+            border: 3px solid var(--glass-bg);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ==================== ERROR ==================== */
+        .error-message {
+            display: none;
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid rgba(239, 68, 68, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        /* ==================== WEATHER DISPLAY ==================== */
+        .weather-container {
+            display: none;
+        }
+
+        .weather-container.active {
+            display: block;
+        }
+
+        .current-weather {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .weather-header {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 20px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .location-info h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .location-info p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .temp-display {
+            text-align: right;
+        }
+
+        .main-temp {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-end;
+        }
+
+        .temp-unit {
+            font-size: 1.5rem;
+            margin-left: 5px;
+            margin-top: 5px;
+            color: var(--text-secondary);
+        }
+
+        .temp-display p {
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .weather-icon-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .weather-icon {
+            width: 70px;
+            height: 70px;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+        }
+
+        .weather-description {
+            font-size: 1.3rem;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .detail-item {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        /* ==================== FORECAST ==================== */
+        .forecast-section {
+            margin-top: 20px;
+        }
+
+        .forecast-title {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .forecast-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            padding: 18px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .forecast-card:hover {
+            transform: translateY(-3px);
+            background: var(--glass-bg-light);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .forecast-date {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+        }
+
+        .forecast-icon {
+            width: 50px;
+            height: 50px;
+            margin: 8px auto;
+        }
+
+        .forecast-temp {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 8px 0;
+        }
+
+        .forecast-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: capitalize;
+        }
+
+        .temp-range {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 8px;
+            font-size: 0.85rem;
+        }
+
+        .temp-max {
+            color: #ffd700;
+        }
+
+        .temp-min {
+            color: #87ceeb;
+        }
+
+        /* ==================== CACHE BADGE ==================== */
+        .cache-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: 10px;
+        }
+
+        .cache-api {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .cache-cached {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        /* ==================== RESPONSIVE - MOBILE FIRST ==================== */
+
+        /* Tablet & Small Desktop */
+        @media (max-width: 1024px) {
+            .container {
+                max-width: 95%;
+            }
+
+            .forecast-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Mobile Landscape & Portrait */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            .subtitle {
+                font-size: 0.85rem;
+            }
+
+            /* Search Section - Mobile Optimized */
+            .search-section {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .search-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .search-input,
+            .btn {
+                width: 100%;
+                min-width: unset;
+            }
+
+            /* Larger touch targets for mobile */
+            .search-input {
+                padding: 14px 16px;
+                font-size: 1rem;
+                border-radius: 12px;
+            }
+
+            .btn {
+                padding: 14px 20px;
+                font-size: 1rem;
+                border-radius: 12px;
+                font-weight: 700;
+            }
+
+            /* Current Weather - Mobile Layout */
+            .current-weather {
+                padding: 18px;
+                margin-bottom: 15px;
+            }
+
+            .weather-header {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 15px;
+                margin-bottom: 15px;
+            }
+
+            .location-info h2 {
+                font-size: 1.5rem;
+            }
+
+            .location-info p {
+                font-size: 0.8rem;
+            }
+
+            /* Temperature Display - Centered Mobile */
+            .temp-display {
+                text-align: center;
+                margin-bottom: 10px;
+            }
+
+            .main-temp {
+                justify-content: center;
+                font-size: 3.5rem;
+            }
+
+            .temp-unit {
+                font-size: 1.8rem;
+            }
+
+            .temp-display p {
+                font-size: 0.85rem;
+            }
+
+            /* Weather Icon - Mobile Friendly */
+            .weather-icon-container {
+                flex-direction: column;
+                text-align: center;
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+
+            .weather-icon {
+                width: 80px;
+                height: 80px;
+            }
+
+            .weather-description {
+                font-size: 1.1rem;
+            }
+
+            /* Weather Details - 2 Column Grid */
+            .weather-details {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .detail-item {
+                padding: 12px;
+            }
+
+            .detail-label {
+                font-size: 0.7rem;
+            }
+
+            .detail-value {
+                font-size: 1.1rem;
+            }
+
+            /* Forecast Section - Mobile */
+            .forecast-section {
+                margin-top: 15px;
+            }
+
+            .forecast-title {
+                font-size: 1.2rem;
+                margin-bottom: 12px;
+            }
+
+            .forecast-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .forecast-card {
+                padding: 15px;
+            }
+
+            .forecast-date {
+                font-size: 0.8rem;
+            }
+
+            .forecast-icon {
+                width: 45px;
+                height: 45px;
+            }
+
+            .forecast-temp {
+                font-size: 1.3rem;
+            }
+
+            .forecast-desc {
+                font-size: 0.75rem;
+            }
+
+            /* Loading & Error */
+            .loading {
+                padding: 20px;
+            }
+
+            .spinner {
+                width: 35px;
+                height: 35px;
+            }
+
+            .error-message {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Small Mobile (iPhone SE, small Android) */
+        @media (max-width: 375px) {
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            .main-temp {
+                font-size: 3rem;
+            }
+
+            .temp-unit {
+                font-size: 1.5rem;
+            }
+
+            .weather-icon {
+                width: 70px;
+                height: 70px;
+            }
+
+            .weather-details {
+                gap: 8px;
+            }
+
+            .detail-item {
+                padding: 10px;
+            }
+
+            .detail-value {
+                font-size: 1rem;
+            }
+
+            .forecast-card {
+                padding: 12px;
+            }
+        }
+
+        /* Touch Device Optimizations */
+        @media (hover: none) and (pointer: coarse) {
+
+            /* Increase touch target sizes */
+            .btn {
+                min-height: 48px;
+            }
+
+            .search-input {
+                min-height: 48px;
+            }
+
+            /* Improve tap feedback */
+            .btn:active {
+                transform: scale(0.98);
+                opacity: 0.9;
+            }
+
+            .forecast-card:active {
+                transform: translateY(0);
+                opacity: 0.95;
+            }
+
+            /* Remove hover effects on touch devices */
+            .current-weather:hover {
+                transform: none;
+                box-shadow: var(--shadow);
+            }
+
+            .forecast-card:hover {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>☀️ API Dự Báo Thời Tiết</h1>
+            <p class="subtitle">Dữ liệu thời tiết thời gian thực từ OpenWeatherMap</p>
+        </header>
+
+        <div class="search-section">
+            <div class="search-controls">
+                <input type="text" id="cityInput" class="search-input"
+                    placeholder="Nhập địa điểm (thành phố, địa danh, quận, tỉnh...)" autocomplete="off">
+                <button class="btn btn-primary" id="searchBtn">
+                    🔍 Tìm kiếm
+                </button>
+                <button class="btn btn-secondary" id="locationBtn">
+                    📍 Vị trí của tôi
+                </button>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Đang tải dữ liệu thời tiết...</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="weather-container" id="weatherContainer">
+            <!-- Current Weather -->
+            <div class="current-weather">
+                <div class="weather-header">
+                    <div class="location-info">
+                        <h2 id="locationName">-</h2>
+                        <p id="coordinates">-</p>
+                    </div>
+                    <div class="temp-display">
+                        <div class="main-temp">
+                            <span id="temperature">-</span>
+                            <span class="temp-unit">°C</span>
+                        </div>
+                        <p>Cảm giác như <strong id="feelsLike">-</strong>°C</p>
+                    </div>
+                </div>
+
+                <div class="weather-icon-container">
+                    <img id="weatherIcon" class="weather-icon" src="" alt="Biểu tượng thời tiết">
+                    <div>
+                        <div class="weather-description" id="weatherDesc">-</div>
+                        <span class="cache-badge" id="cacheBadge">API</span>
+                    </div>
+                </div>
+
+                <div class="weather-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Độ ẩm</div>
+                        <div class="detail-value" id="humidity">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Tốc độ gió</div>
+                        <div class="detail-value" id="windSpeed">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Áp suất</div>
+                        <div class="detail-value" id="pressure">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Tầm nhìn</div>
+                        <div class="detail-value" id="visibility">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Forecast -->
+            <div class="forecast-section">
+                <h3 class="forecast-title">Dự báo 5 ngày</h3>
+                <div class="forecast-grid" id="forecastGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== CONSTANTS ====================
+        // Dynamic API base URL - works in both development and production
+        const API_BASE = window.location.origin + '/api/weather';
+        // For localhost: http://localhost:3002/api/weather
+        // For production: https://your-app.onrender.com/api/weather
+
+        // ==================== DOM ELEMENTS ====================
+        const cityInput = document.getElementById('cityInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const locationBtn = document.getElementById('locationBtn');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('errorMessage');
+        const weatherContainer = document.getElementById('weatherContainer');
+        const forecastGrid = document.getElementById('forecastGrid');
+
+        // ==================== EVENT LISTENERS ====================
+        searchBtn.addEventListener('click', () => {
+            const city = cityInput.value.trim();
+            if (city) {
+                fetchWeatherByCity(city);
+            }
+        });
+
+        cityInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const city = cityInput.value.trim();
+                if (city) {
+                    fetchWeatherByCity(city);
+                }
+            }
+        });
+
+        locationBtn.addEventListener('click', getUserLocation);
+
+        // ==================== FUNCTIONS ====================
+        function showLoading() {
+            loading.classList.add('active');
+            errorMessage.classList.remove('active');
+            weatherContainer.classList.remove('active');
+        }
+
+        function hideLoading() {
+            loading.classList.remove('active');
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('active');
+            weatherContainer.classList.remove('active');
+            hideLoading();
+        }
+
+        function showWeather() {
+            errorMessage.classList.remove('active');
+            weatherContainer.classList.add('active');
+            hideLoading();
+        }
+
+        async function fetchWeatherByCity(city) {
+            showLoading();
+            try {
+                // Fetch current weather
+                const currentResponse = await fetch(`${API_BASE}/current?city=${encodeURIComponent(city)}`);
+                const currentData = await currentResponse.json();
+
+                if (!currentData.success) {
+                    throw new Error(currentData.message || 'Failed to fetch weather data');
+                }
+
+                // Fetch forecast
+                const forecastResponse = await fetch(`${API_BASE}/forecast?city=${encodeURIComponent(city)}`);
+                const forecastData = await forecastResponse.json();
+
+                if (!forecastData.success) {
+                    throw new Error(forecastData.message || 'Failed to fetch forecast data');
+                }
+
+                displayWeather(currentData.data, currentData.source);
+                displayForecast(forecastData.data);
+                showWeather();
+
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function fetchWeatherByCoords(lat, lon) {
+            showLoading();
+            try {
+                // Fetch current weather
+                const currentResponse = await fetch(`${API_BASE}/current?lat=${lat}&lon=${lon}`);
+                const currentData = await currentResponse.json();
+
+                if (!currentData.success) {
+                    throw new Error(currentData.message || 'Failed to fetch weather data');
+                }
+
+                // Fetch forecast
+                const forecastResponse = await fetch(`${API_BASE}/forecast?lat=${lat}&lon=${lon}`);
+                const forecastData = await forecastResponse.json();
+
+                if (!forecastData.success) {
+                    throw new Error(forecastData.message || 'Failed to fetch forecast data');
+                }
+
+                displayWeather(currentData.data, currentData.source);
+                displayForecast(forecastData.data);
+                showWeather();
+
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function displayWeather(data, source) {
+            // Location
+            document.getElementById('locationName').textContent =
+                `${data.location.name}, ${data.location.country}`;
+            document.getElementById('coordinates').textContent =
+                `${data.location.coordinates.lat.toFixed(2)}° N, ${data.location.coordinates.lon.toFixed(2)}° E`;
+
+            // Temperature
+            document.getElementById('temperature').textContent = data.current.temperature;
+            document.getElementById('feelsLike').textContent = data.current.feelsLike;
+
+            // Weather icon and description
+            document.getElementById('weatherIcon').src = data.current.iconUrl;
+            document.getElementById('weatherDesc').textContent = data.current.description;
+
+            // Cache badge
+            const cacheBadge = document.getElementById('cacheBadge');
+            if (source === 'cache') {
+                cacheBadge.textContent = '💾 Cached';
+                cacheBadge.className = 'cache-badge cache-cached';
+            } else {
+                cacheBadge.textContent = '🌐 API';
+                cacheBadge.className = 'cache-badge cache-api';
+            }
+
+            // Details
+            document.getElementById('humidity').textContent = `${data.current.humidity}%`;
+            document.getElementById('windSpeed').textContent = `${data.wind.speed} m/s`;
+            document.getElementById('pressure').textContent = `${data.current.pressure} hPa`;
+            document.getElementById('visibility').textContent = `${(data.visibility / 1000).toFixed(1)} km`;
+        }
+
+        function displayForecast(data) {
+            forecastGrid.innerHTML = '';
+
+            data.forecast.forEach(day => {
+                const card = document.createElement('div');
+                card.className = 'forecast-card';
+
+                card.innerHTML = `
+                    <div class="forecast-date">${day.date}</div>
+                    <img src="${day.iconUrl}" alt="${day.description}" class="forecast-icon">
+                    <div class="temp-range">
+                        <span class="temp-max">↑ ${day.temperature.max}°C</span>
+                        <span class="temp-min">↓ ${day.temperature.min}°C</span>
+                    </div>
+                    <div class="forecast-desc">${day.description}</div>
+                `;
+
+                forecastGrid.appendChild(card);
+            });
+        }
+
+        function getUserLocation() {
+            if (!navigator.geolocation) {
+                showError('Trình duyệt của bạn không hỗ trợ định vị');
+                return;
+            }
+
+            showLoading();
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    fetchWeatherByCoords(lat, lon);
+                },
+                (error) => {
+                    let errorMsg = 'Không thể lấy vị trí của bạn. ';
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMsg += 'Vui lòng cho phép truy cập vị trí.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMsg += 'Thông tin vị trí không khả dụng.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMsg += 'Yêu cầu vị trí hết thời gian.';
+                            break;
+                        default:
+                            errorMsg += 'Đã xảy ra lỗi không xác định.';
+                    }
+                    showError(errorMsg);
+                }
+            );
+        }
+
+        // ==================== INITIAL LOAD ====================
+        // Load default city on page load
+        window.addEventListener('load', () => {
+            fetchWeatherByCity('Hà Nội');
+        });
+    </script>
+</body>
+
+</html>

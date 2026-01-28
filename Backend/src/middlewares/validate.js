@@ -3,16 +3,19 @@
 // ==========================================
 
 /**
- * Middleware factory for validating request body with Joi schema
+ * Middleware factory for validating request data with Joi schema
  * @param {Joi.Schema} schema - Joi validation schema
+ * @param {string} source - Source of data to validate: 'body' (default), 'query', 'params'
  * @returns {Function} Express middleware
  */
-const validate = (schema) => {
+const validate = (schema, source = 'body') => {
     return (req, res, next) => {
-        const { error, value } = schema.validate(req.body, {
+        const dataToValidate = req[source];
+
+        const { error, value } = schema.validate(dataToValidate, {
             abortEarly: false,    // Return all errors, not just the first
-            stripUnknown: true,   // Remove unknown fields from the body
-            convert: true         // Convert types when possible (e.g., string to date)
+            stripUnknown: true,   // Remove unknown fields
+            convert: true         // Convert types when possible (e.g., string to number)
         });
 
         if (error) {
@@ -29,8 +32,8 @@ const validate = (schema) => {
             });
         }
 
-        // Replace req.body with validated & sanitized value
-        req.body = value;
+        // Replace req[source] with validated & sanitized value
+        req[source] = value;
         next();
     };
 };

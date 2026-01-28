@@ -47,6 +47,11 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
 // Static file serving for uploads
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// Weather demo page
+app.get('/weather-demo', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'weather-demo.html'));
+});
+
 // ==========================================
 // ROUTES
 // ==========================================
@@ -117,7 +122,14 @@ if (require.main === module) {
         console.log('   DELETE /api/uploads/:filename   - Delete a file');
         console.log('   Static: /uploads/:filename      - Access uploaded files');
 
+        console.log('\n☀️  WEATHER ROUTES:');
+        console.log('   GET    /api/weather/current     - Current weather (by city or coords)');
+        console.log('   GET    /api/weather/forecast    - 5-day forecast');
+        console.log('   GET    /api/weather/cache/stats - Cache statistics');
+        console.log('   DELETE /api/weather/cache/clear - Clear cache');
+
         console.log('\n📖 Swagger UI: http://localhost:' + PORT + '/api-docs');
+        console.log('🌤️  Weather Demo: http://localhost:' + PORT + '/weather-demo');
         console.log('\n');
     });
 }
