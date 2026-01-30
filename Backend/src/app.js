@@ -7,6 +7,10 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const express = require('express');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const mongoSanitize = require('express-mongo-sanitize');
+const compression = require('compression');
 
 // Import centralized config
 const { server, connectDB, logConfigStatus } = require('./config');
@@ -30,8 +34,43 @@ logConfigStatus();
 connectDB();
 
 // ==========================================
+// SECURITY MIDDLEWARE
+// ==========================================
+// Helmet - Security headers
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", "data:", "https://openweathermap.org"]
+        }
+    }
+}));
+
+// Rate limiting - Protect against brute force
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: 'Too many requests from this IP, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+// MongoDB Sanitization - Prevent NoSQL injection
+app.use(mongoSanitize());
+
+// ==========================================
 // MIDDLEWARE
 // ==========================================
+// Request logging
+const requestLogger = require('./middlewares/requestLogger');
+app.use(requestLogger);
+
+// Compression - Reduce response size
+app.use(compression());
+
 app.use(express.json());
 
 // Enable CORS for cross-origin requests
@@ -55,19 +94,19 @@ app.get('/weather-demo', (req, res) => {
 // ==========================================
 // ROUTES
 // ==========================================
-app.use('/api', apiRoutes);
+// Apply rate limiting to all API routes
+app.use('/api', apiLimiter, apiRoutes);
 
 // ==========================================
 // ERROR HANDLING MIDDLEWARE
 // ==========================================
-// Global error handler - catches all unhandled errors
-app.use((err, req, res, next) => {
-    console.error('❌ Unhandled Error:', err.message);
-    res.status(err.status || 500).json({
-        success: false,
-        message: err.message || 'Internal Server Error'
-    });
-});
+const { errorHandler, notFoundHandler } = require('./middlewares/errorHandler');
+
+// 404 handler - must be after all routes
+app.use(notFoundHandler);
+
+// Global error handler - must be last
+app.use(errorHandler);
 
 // ==========================================
 // START SERVER (only if not testing)

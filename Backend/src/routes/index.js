@@ -12,6 +12,7 @@ const authRoutes = require('./authRoutes');
 const uploadRoutes = require('./uploadRoutes');
 const postRoutes = require('./postRoutes');
 const weatherRoutes = require('./weatherRoutes');
+const healthRoutes = require('./healthRoutes');
 
 // Mount routes
 router.use('/users', userRoutes);
@@ -21,5 +22,6 @@ router.use('/tasks', taskRoutes);
 router.use('/uploads', uploadRoutes);
 router.use('/posts', postRoutes);
 router.use('/weather', weatherRoutes);
+router.use('/health', healthRoutes);
 
 module.exports = router;

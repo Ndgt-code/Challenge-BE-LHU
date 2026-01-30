@@ -4,21 +4,41 @@
 
 const axios = require('axios');
 
-// API Configuration
-const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY;
-const OPENWEATHER_BASE_URL = process.env.OPENWEATHER_BASE_URL || 'https://api.openweathermap.org/data/2.5';
-const GEOCODING_BASE_URL = 'http://api.openweathermap.org/geo/1.0';
+// ==========================================
+// CONSTANTS
+// ==========================================
+const API_CONFIG = {
+    BASE_URL: process.env.OPENWEATHER_BASE_URL || 'https://api.openweathermap.org/data/2.5',
+    GEOCODING_URL: 'http://api.openweathermap.org/geo/1.0',
+    KEY: process.env.OPENWEATHER_API_KEY,
+    TIMEOUT: 10000, // 10 seconds
+    GEOCODING_LIMIT: 5
+};
+
+const ERROR_MESSAGES = {
+    MISSING_API_KEY: 'OpenWeatherMap API key is not configured. Please set OPENWEATHER_API_KEY in your .env file. Get your free API key at: https://openweathermap.org/api',
+    INVALID_API_KEY: 'Invalid API key. Please check your OPENWEATHER_API_KEY in .env file.',
+    LOCATION_NOT_FOUND: 'Location not found. Please check the spelling and try again.',
+    RATE_LIMIT: 'API rate limit exceeded. Please try again later.',
+    CONNECTION_ERROR: 'Unable to connect to weather service. Please check your internet connection.'
+};
+
+const CACHE_SOURCE = {
+    API: 'api',
+    CACHE: 'cache'
+};
+
+// API Configuration (deprecated - kept for backward compatibility)
+const OPENWEATHER_API_KEY = API_CONFIG.KEY;
+const OPENWEATHER_BASE_URL = API_CONFIG.BASE_URL;
+const GEOCODING_BASE_URL = API_CONFIG.GEOCODING_URL;
 
 /**
  * Validate API key configuration
  */
 const validateApiKey = () => {
-    if (!OPENWEATHER_API_KEY || OPENWEATHER_API_KEY === 'your_api_key_here') {
-        throw new Error(
-            'OpenWeatherMap API key is not configured. ' +
-            'Please set OPENWEATHER_API_KEY in your .env file. ' +
-            'Get your free API key at: https://openweathermap.org/api'
-        );
+    if (!API_CONFIG.KEY || API_CONFIG.KEY === 'your_api_key_here') {
+        throw new Error(ERROR_MESSAGES.MISSING_API_KEY);
     }
 };
 
@@ -32,16 +52,16 @@ const handleApiError = (error) => {
 
         switch (status) {
             case 401:
-                return new Error('Invalid API key. Please check your OPENWEATHER_API_KEY in .env file.');
+                return new Error(ERROR_MESSAGES.INVALID_API_KEY);
             case 404:
-                return new Error('Location not found. Please check the spelling and try again.');
+                return new Error(ERROR_MESSAGES.LOCATION_NOT_FOUND);
             case 429:
-                return new Error('API rate limit exceeded. Please try again later.');
+                return new Error(ERROR_MESSAGES.RATE_LIMIT);
             default:
                 return new Error(`Weather API error: ${message}`);
         }
     } else if (error.request) {
-        return new Error('Unable to connect to weather service. Please check your internet connection.');
+        return new Error(ERROR_MESSAGES.CONNECTION_ERROR);
     } else {
         return new Error(`Weather service error: ${error.message}`);
     }
