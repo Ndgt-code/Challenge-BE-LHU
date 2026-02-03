@@ -29,6 +29,23 @@ const getAllProducts = async (req, res) => {
 };
 
 // ------------------------------------------
+// GET product by ID
+// ------------------------------------------
+const getProductById = async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+
+        if (!product) {
+            return errorResponse(res, 'Product not found', 404);
+        }
+
+        return successResponse(res, 'Product retrieved successfully', product);
+    } catch (error) {
+        return errorResponse(res, error.message, 500);
+    }
+};
+
+// ------------------------------------------
 // CREATE product
 // ------------------------------------------
 const createProduct = async (req, res) => {
@@ -38,7 +55,9 @@ const createProduct = async (req, res) => {
             price: req.body.price,
             description: req.body.description,
             stock: req.body.stock,
-            category: req.body.category
+            category: req.body.category,
+            featuredImage: req.body.featuredImage,
+            images: req.body.images || []
         });
 
         return successResponse(res, 'Product created successfully!', product, 201);
@@ -165,6 +184,7 @@ const deleteOutOfStockProducts = async (req, res) => {
 
 module.exports = {
     getAllProducts,
+    getProductById,
     createProduct,
     updateProduct,
     increaseStock,

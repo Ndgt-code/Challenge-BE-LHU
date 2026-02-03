@@ -40,7 +40,16 @@ const postSchema = new Schema({
         type: String,
         enum: ['draft', 'published', 'archived'],
         default: 'published'
-    }
+    },
+    // Featured image (cover image for the post)
+    featuredImage: {
+        type: String,
+        default: null
+    },
+    // Image gallery for additional post images
+    imageGallery: [{
+        type: String
+    }]
 }, {
     timestamps: true, // createdAt, updatedAt
     toJSON: { virtuals: true },

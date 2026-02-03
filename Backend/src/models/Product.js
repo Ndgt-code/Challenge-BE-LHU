@@ -33,7 +33,18 @@ const productSchema = new mongoose.Schema({
         type: String,
         enum: ['electronics', 'clothing', 'food', 'other'],
         default: 'other'
-    }
+    },
+
+    // Featured image (main product image)
+    featuredImage: {
+        type: String,
+        default: null
+    },
+
+    // Additional product images
+    images: [{
+        type: String
+    }]
 }, {
     timestamps: true
 });

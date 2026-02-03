@@ -1,6 +1,8 @@
 // Test setup file
 // This file runs before all tests
 
+const mongoose = require('mongoose');
+
 // Increase timeout for all tests
 jest.setTimeout(30000);
 
@@ -14,6 +16,6 @@ global.console = {
 
 // Clean up after all tests
 afterAll(async () => {
-    // Close any open connections, etc.
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Close mongoose connection to prevent Jest hanging
+    await mongoose.connection.close();
 });

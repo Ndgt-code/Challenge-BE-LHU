@@ -67,21 +67,57 @@ RESTful API for managing Users, Products, Tasks, and Posts with JWT Authenticati
                         name: { type: 'string', example: 'iPhone 15' },
                         price: { type: 'number', example: 999 },
                         description: { type: 'string', example: 'Latest iPhone model' },
-                        category: { type: 'string', enum: ['electronics', 'clothing', 'food', 'other'] },
-                        stock: { type: 'integer', example: 100 }
+                        category: { type: 'string', enum: ['electronics', 'clothing', 'food', 'other'], example: 'electronics' },
+                        stock: { type: 'integer', example: 100 },
+                        featuredImage: { type: 'string', example: '/uploads/iphone-main.jpg', description: 'Main product image URL' },
+                        images: {
+                            type: 'array',
+                            items: { type: 'string' },
+                            example: ['/uploads/iphone-1.jpg', '/uploads/iphone-2.jpg'],
+                            description: 'Additional product images'
+                        },
+                        createdAt: { type: 'string', format: 'date-time' },
+                        updatedAt: { type: 'string', format: 'date-time' }
                     }
                 },
                 // Post Schema
                 Post: {
                     type: 'object',
                     properties: {
-                        _id: { type: 'string' },
-                        title: { type: 'string', example: 'My First Post' },
-                        content: { type: 'string', example: 'Post content here...' },
+                        _id: { type: 'string', example: '507f1f77bcf86cd799439013' },
+                        title: { type: 'string', example: 'My First Blog Post', maxLength: 200 },
+                        content: { type: 'string', example: 'This is the full content of my blog post...' },
                         author: { $ref: '#/components/schemas/User' },
+                        tags: {
+                            type: 'array',
+                            items: { type: 'string' },
+                            example: ['technology', 'lifestyle'],
+                            maxItems: 10
+                        },
                         likesCount: { type: 'integer', example: 5 },
-                        status: { type: 'string', enum: ['draft', 'published', 'archived'] },
-                        createdAt: { type: 'string', format: 'date-time' }
+                        status: { type: 'string', enum: ['draft', 'published', 'archived'], example: 'published' },
+                        featuredImage: { type: 'string', example: '/uploads/post-cover.jpg', description: 'Cover image for the post' },
+                        imageGallery: {
+                            type: 'array',
+                            items: { type: 'string' },
+                            example: ['/uploads/gallery-1.jpg', '/uploads/gallery-2.jpg'],
+                            maxItems: 10,
+                            description: 'Additional images for the post'
+                        },
+                        createdAt: { type: 'string', format: 'date-time' },
+                        updatedAt: { type: 'string', format: 'date-time' }
+                    }
+                },
+                // Comment Schema
+                Comment: {
+                    type: 'object',
+                    properties: {
+                        _id: { type: 'string', example: '507f1f77bcf86cd799439014' },
+                        content: { type: 'string', example: 'Great post!', maxLength: 1000 },
+                        post: { type: 'string', example: '507f1f77bcf86cd799439013', description: 'Post ID' },
+                        author: { $ref: '#/components/schemas/User' },
+                        createdAt: { type: 'string', format: 'date-time' },
+                        updatedAt: { type: 'string', format: 'date-time' }
                     }
                 },
                 // Error Response Schema
@@ -646,7 +682,9 @@ RESTful API for managing Users, Products, Tasks, and Posts with JWT Authenticati
                 },
                 post: {
                     tags: ['Products'],
-                    summary: 'Create new product',
+                    summary: 'Create new product (Protected)',
+                    description: 'Requires authentication. Create a new product with optional image URLs.',
+                    security: [{ bearerAuth: [] }],
                     requestBody: {
                         required: true,
                         content: {
@@ -655,39 +693,79 @@ RESTful API for managing Users, Products, Tasks, and Posts with JWT Authenticati
                                     type: 'object',
                                     required: ['name', 'price'],
                                     properties: {
-                                        name: { type: 'string', example: 'New Product' },
-                                        price: { type: 'number', example: 500000 },
-                                        description: { type: 'string', example: 'Product description' },
-                                        stock: { type: 'number', example: 10 },
-                                        category: { type: 'string', enum: ['electronics', 'clothing', 'food', 'other'], example: 'electronics' }
+                                        name: { type: 'string', example: 'iPhone 15 Pro', minLength: 3, maxLength: 100 },
+                                        price: { type: 'number', example: 999, minimum: 0 },
+                                        description: { type: 'string', example: 'Latest flagship iPhone with advanced features' },
+                                        stock: { type: 'number', example: 50, minimum: 0 },
+                                        category: { type: 'string', enum: ['electronics', 'clothing', 'food', 'other'], example: 'electronics' },
+                                        featuredImage: { type: 'string', example: '/uploads/iphone-main.jpg', description: 'Main product image URL' },
+                                        images: {
+                                            type: 'array',
+                                            items: { type: 'string' },
+                                            example: ['/uploads/iphone-1.jpg', '/uploads/iphone-2.jpg'],
+                                            maxItems: 10,
+                                            description: 'Additional product images (max 10)'
+                                        }
                                     }
                                 }
                             }
                         }
                     },
-                    responses: { 201: { description: 'Product created' } }
+                    responses: {
+                        201: { description: 'Product created successfully' },
+                        400: { description: 'Validation failed' },
+                        401: { description: 'Unauthorized - No token provided' }
+                    }
                 }
             },
             '/api/products/{id}': {
+                get: {
+                    tags: ['Products'],
+                    summary: 'Get product by ID',
+                    description: 'Retrieve a single product with all details including images',
+                    parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Product ID' }],
+                    responses: {
+                        200: {
+                            description: 'Product retrieved successfully',
+                            content: {
+                                'application/json': {
+                                    schema: { $ref: '#/components/schemas/Product' }
+                                }
+                            }
+                        },
+                        404: { description: 'Product not found' }
+                    }
+                },
                 put: {
                     tags: ['Products'],
-                    summary: 'Update product by ID',
-                    parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+                    summary: 'Update product by ID (Protected)',
+                    description: 'Requires authentication. Update product information including images.',
+                    security: [{ bearerAuth: [] }],
+                    parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Product ID' }],
                     requestBody: {
                         content: {
                             'application/json': {
                                 schema: {
                                     type: 'object',
                                     properties: {
-                                        name: { type: 'string' },
-                                        price: { type: 'number' },
-                                        stock: { type: 'number' }
+                                        name: { type: 'string', minLength: 3, maxLength: 100 },
+                                        price: { type: 'number', minimum: 0 },
+                                        description: { type: 'string' },
+                                        stock: { type: 'number', minimum: 0 },
+                                        category: { type: 'string', enum: ['electronics', 'clothing', 'food', 'other'] },
+                                        featuredImage: { type: 'string' },
+                                        images: { type: 'array', items: { type: 'string' }, maxItems: 10 }
                                     }
                                 }
                             }
                         }
                     },
-                    responses: { 200: { description: 'Product updated' } }
+                    responses: {
+                        200: { description: 'Product updated successfully' },
+                        400: { description: 'Validation failed' },
+                        401: { description: 'Unauthorized' },
+                        404: { description: 'Product not found' }
+                    }
                 },
                 delete: {
                     tags: ['Products'],

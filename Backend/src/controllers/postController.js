@@ -17,7 +17,9 @@ const createPost = async (req, res) => {
             content: req.body.content,
             author: req.user._id, // From authenticated user
             tags: req.body.tags || [],
-            status: req.body.status || 'published'
+            status: req.body.status || 'published',
+            featuredImage: req.body.featuredImage,
+            imageGallery: req.body.imageGallery || []
         });
 
         // Populate author info before returning
@@ -140,7 +142,9 @@ const updatePost = async (req, res) => {
                 title: req.body.title || post.title,
                 content: req.body.content || post.content,
                 tags: req.body.tags || post.tags,
-                status: req.body.status || post.status
+                status: req.body.status || post.status,
+                featuredImage: req.body.featuredImage !== undefined ? req.body.featuredImage : post.featuredImage,
+                imageGallery: req.body.imageGallery || post.imageGallery
             },
             { new: true, runValidators: true }
         ).populate('author', 'username email');
@@ -163,7 +167,10 @@ const deletePost = async (req, res) => {
         }
 
         // Check if user is author or admin
-        if (post.author.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+        const isAuthor = post.author.toString() === req.user._id.toString();
+        const isAdmin = req.user.role === 'admin';
+
+        if (!isAuthor && !isAdmin) {
             return errorResponse(res, 'Not authorized to delete this post', 403);
         }
 

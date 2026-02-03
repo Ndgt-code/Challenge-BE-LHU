@@ -8,6 +8,7 @@ const productController = require('../controllers/productController');
 
 // Import authentication middleware
 const { authenticate, authorize } = require('../middlewares/authMiddleware');
+const { validateCreateProduct, validateUpdateProduct, validateStockOperation } = require('../validations/productValidation');
 
 // ==========================================
 // PUBLIC ROUTES (Anyone can view)
@@ -16,6 +17,9 @@ const { authenticate, authorize } = require('../middlewares/authMiddleware');
 // GET - Retrieve all products
 router.get('/', productController.getAllProducts);
 
+// GET - Retrieve single product by ID
+router.get('/:id', productController.getProductById);
+
 // ==========================================
 // PROTECTED ROUTES (Auth required)
 // ==========================================
@@ -23,24 +27,28 @@ router.get('/', productController.getAllProducts);
 // POST - Create product (must be logged in)
 router.post('/',
     authenticate,
+    validateCreateProduct,
     productController.createProduct
 );
 
 // PUT - Update product by ID (must be logged in)
 router.put('/:id',
     authenticate,
+    validateUpdateProduct,
     productController.updateProduct
 );
 
 // PATCH - Increase stock (must be logged in)
 router.patch('/:id/increase-stock',
     authenticate,
+    validateStockOperation,
     productController.increaseStock
 );
 
 // PATCH - Decrease stock (must be logged in)
 router.patch('/:id/decrease-stock',
     authenticate,
+    validateStockOperation,
     productController.decreaseStock
 );
 
