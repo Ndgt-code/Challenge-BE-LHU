@@ -39,6 +39,8 @@ jobs:
           NODE_ENV: test
           MONGODB_URI: ${{ secrets.MONGODB_URI_TEST }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_EXPIRES_IN: 7d
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
           PORT: 3002
 
       - name: Generate coverage report
